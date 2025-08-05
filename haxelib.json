@@ -1,10 +1,10 @@
 {
-	"name": "pirhana",
-	"url" : "https://github.com/pirhanalabs/pirhana",
+	"name": "plib",
+	"url" : "https://github.com/pirhanalabs/plib",
 	"license": "MIT",
 	"tags": ["Heaps","Hashlink","package","pirhana"],
 	"description": "Toolkit library for my personal use",
-	"version": "1.1.27",
+	"version": "1.0.0",
 	"classPath": "src/",
 	"releasenote": "",
 	"contributors": ["pirhanalabs"],
