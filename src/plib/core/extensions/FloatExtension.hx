@@ -3,11 +3,11 @@ package plib.core.extensions;
 class FloatExtension{
 
 
-    public static inline function int(me:Float){
+    public static inline function int(me:Float):Int{
         return Math.floor(me);
     }
 
-    public static inline function pretty(me:Float, precision:Int = 2){
+    public static inline function pretty(me:Float, precision:Int = 2):Float{
         if (precision == 0)
             return Math.round(me);
         final d = Math.pow(10, precision);
