@@ -1,4 +1,4 @@
-package core.heaps.animator;
+package plib.core.heaps.animator;
 
 class AnimatorController<T:h2d.Object> implements IAnimatorController implements engine.IUpdateable
 {

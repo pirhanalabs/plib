@@ -1,4 +1,4 @@
-package core.heaps;
+package plib.core.heaps;
 
 class Animation extends h2d.Drawable
 {

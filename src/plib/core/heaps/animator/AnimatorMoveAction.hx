@@ -1,4 +1,4 @@
-package core.heaps.animator;
+package plib.core.heaps.animator;
 
 class AnimatorMoveAction implements IAnimatorAction
 {

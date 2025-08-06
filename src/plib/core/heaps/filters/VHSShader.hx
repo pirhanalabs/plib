@@ -1,4 +1,4 @@
-package core.heaps.filters;
+package plib.core.heaps.filters;
 
 class VHSShader extends h2d.filter.Shader<InternalShader>
 {

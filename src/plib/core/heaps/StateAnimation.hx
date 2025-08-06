@@ -1,4 +1,4 @@
-package core.heaps;
+package plib.core.heaps;
 
 private typedef State = {
 	frameDuration:Float,
