@@ -7,7 +7,7 @@ class Globals{
     /**
         Sets a global variable.
     **/
-    public static function set(id:String, val:T){
+    public static function set<T>(id:String, val:T){
         Globals.values.set(id, val);
     }
 
