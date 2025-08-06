@@ -21,13 +21,13 @@ class AnimatorNode
 		return c;
 	}
 
-	@:allow(core.animator.Animator)
+	@:allow(plib.core.animator.Animator)
 	private function update(frame:plib.engine.Frame)
 	{
 		// override this
 	}
 
-	@:allow(core.animator.Animator)
+	@:allow(plib.core.animator.Animator)
 	private function postupdate()
 	{
 		// override this
