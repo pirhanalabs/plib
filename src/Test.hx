@@ -1,10 +1,12 @@
-class Test{
+import plib.engine.Application;
+
+class Test extends Application{
 
     public static function main(){
-        new Test();
+        new Test(600, 300);
     }
 
-    private function new(){
-        
+    override function ready() {
+        super.ready();
     }
 }

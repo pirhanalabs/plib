@@ -1,4 +1,4 @@
-package core.navigation;
+package plib.core.navigation;
 
 class NavigationHelper
 {
@@ -6,7 +6,7 @@ class NavigationHelper
 		Connects an array of INavigationInstance instances in a linear fashion, in the given direction.
 		This makes a two-way link between each instance.
 	**/
-	public static function buildLinear<T:INavigationInstance>(nav:NavigationManager, direction:engine.Direction, instances:Array<T>)
+	public static function buildLinear<T:INavigationInstance>(nav:NavigationManager, direction:plib.Direction, instances:Array<T>)
 	{
 		for (i in 0...instances.length - 1)
 		{
@@ -20,7 +20,7 @@ class NavigationHelper
 		Adds a portal to the navigation group, which will lead to the given navigation manager.
 		The portal will be created for each instance in the given direction.
 	**/
-	public static function buildPortalToNav<T:INavigationInstance>(group:NavigationGroupManager, nav:NavigationManager, direction:engine.Direction,
+	public static function buildPortalToNav<T:INavigationInstance>(group:NavigationGroupManager, nav:NavigationManager, direction:plib.Direction,
 			instances:Array<T>)
 	{
 		for (i in 0...instances.length)
@@ -48,16 +48,16 @@ class NavigationHelper
 
 				// left
 				if (x > 0 && grid[y][x - 1] != null)
-					nav.link2(cell, grid[y][x - 1], engine.Direction.W);
+					nav.link2(cell, grid[y][x - 1], plib.Direction.W);
 				// right
 				if (x < cols - 1 && grid[y][x + 1] != null)
-					nav.link2(cell, grid[y][x + 1], engine.Direction.E);
+					nav.link2(cell, grid[y][x + 1], plib.Direction.E);
 				// up
 				if (y > 0 && grid[y - 1][x] != null)
-					nav.link2(cell, grid[y - 1][x], engine.Direction.N);
+					nav.link2(cell, grid[y - 1][x], plib.Direction.N);
 				// down
 				if (y < rows - 1 && grid[y + 1][x] != null)
-					nav.link2(cell, grid[y + 1][x], engine.Direction.S);
+					nav.link2(cell, grid[y + 1][x], plib.Direction.S);
 			}
 		}
 	}

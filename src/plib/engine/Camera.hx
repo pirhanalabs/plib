@@ -2,7 +2,7 @@ package plib.engine;
 
 class Camera
 {
-	@:allow(engine.IApplication)
+	@:allow(plib.engine.IApplication)
 	var ob1:h2d.Object; // camera container
 	var ob2:h2d.Object; // camera object
 	var ob3:h2d.Object; // root repositioner
@@ -55,7 +55,7 @@ class Camera
 		this.shakeTimeMax = seconds;
 	}
 
-	public function update(frame:engine.Frame)
+	public function update(frame:plib.engine.Frame)
 	{
 		ob2x = 0;
 

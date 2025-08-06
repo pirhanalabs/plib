@@ -14,7 +14,7 @@ class CustomCursor
 	private var delta_x:Float;
 	private var delta_y:Float;
 
-	@:allow(engine.IApplication)
+	@:allow(plib.engine.IApplication)
 	private var cursor:h2d.Object;
 
 	public function new()
@@ -69,14 +69,14 @@ class CustomCursor
 		}
 	}
 
-	@:allow(engine.IApplication)
+	@:allow(plib.engine.IApplication)
 	private function onMove(e:hxd.Event)
 	{
 		setCursorPosition(e.relX, e.relY);
 	}
 
 	/** x/y must be global positions. **/
-	@:allow(engine.IApplication)
+	@:allow(plib.engine.IApplication)
 	private function setCursorPosition(_x:Float, _y:Float)
 	{
 		if (cursor.parent == null)
@@ -88,14 +88,14 @@ class CustomCursor
 		this.y = point.y;
 	}
 
-	@:allow(engine.IApplication)
+	@:allow(plib.engine.IApplication)
 	private function onResize(scale:Float)
 	{
 		this.cursor.setScale(Std.int(scale));
 	}
 
-	@:allow(engine.IApplication)
-	private function update(frame:engine.Frame)
+	@:allow(plib.engine.IApplication)
+	private function update(frame:plib.engine.Frame)
 	{
 		var distx = this.x - this.cursor.x;
 		var disty = this.y - this.cursor.y;
@@ -103,7 +103,7 @@ class CustomCursor
 		delta_y = disty * smoothing * frame.tmod;
 	}
 
-	@:allow(engine.IApplication)
+	@:allow(plib.engine.IApplication)
 	private function postupdate()
 	{
 		this.cursor.x += delta_x;

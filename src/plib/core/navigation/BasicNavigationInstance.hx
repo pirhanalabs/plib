@@ -1,4 +1,4 @@
-package core.navigation;
+package plib.core.navigation;
 
 class BasicNavigationInstance extends h2d.Object implements INavigationInstance
 {

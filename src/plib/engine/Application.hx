@@ -14,9 +14,9 @@ class Application extends hxd.App implements IApplication
 
 	// accessors
 	private var window:hxd.Window;
-	private var frame:engine.Frame;
-	private var cursor:engine.CustomCursor;
-	private var inputs:engine.InputManager;
+	private var frame:plib.engine.Frame;
+	private var cursor:plib.engine.CustomCursor;
+	private var inputs:plib.engine.InputManager;
 
 	public var vw(default, null):Int;
 	public var vh(default, null):Int;
@@ -94,13 +94,13 @@ class Application extends hxd.App implements IApplication
 	private function __initSystems()
 	{
 		this.window = hxd.Window.getInstance();
-		this.frame = new engine.Frame();
+		this.frame = new plib.engine.Frame();
 
-		this.cursor = new engine.CustomCursor();
+		this.cursor = new plib.engine.CustomCursor();
 		overlayLayer.add(this.cursor.cursor, 2);
 		this.cursor.setCursorPosition(window.mouseX, window.mouseY);
 
-		this.inputs = new engine.InputManager();
+		this.inputs = new plib.engine.InputManager();
 	}
 
 	@:noCompletion
@@ -315,5 +315,9 @@ class Application extends hxd.App implements IApplication
 	public inline function getCursor()
 	{
 		return this.cursor;
+	}
+
+	public inline function getFrame(){
+		return this.frame;
 	}
 }

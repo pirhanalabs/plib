@@ -80,7 +80,7 @@ class InputManager
 
 	public function isAnalogPressed(dir:plib.Direction)
 	{
-		return analogInputs[dir.id] == Game.instance.frame.frames - 1;
+		return analogInputs[dir.id] == Application.get().getFrame().frames - 1;
 	}
 
 	public function isAnalogDown(dir:plib.Direction)
@@ -88,13 +88,13 @@ class InputManager
 		return analogInputs[dir.id] > 0;
 	}
 
-	public function isAnalogReleased(dir:engine.Direction)
+	public function isAnalogReleased(dir:plib.Direction)
 	{
-		return analogInputs[dir.id] == -Game.instance.frame.frames;
+		return analogInputs[dir.id] == -Application.get().getFrame().frames;
 	}
 
-	@:allow(engine.Application)
-	private function update(frame:engine.Frame)
+	@:allow(plib.engine.Application)
+	private function update(frame:plib.engine.Frame)
 	{
 		// update analog inputs
 		if (pad.connected)
@@ -118,7 +118,7 @@ class InputManager
 		}
 	}
 
-	private function parseAnalogInput(dir:plib.Direction, frame:engine.Frame, condition:Bool)
+	private function parseAnalogInput(dir:plib.Direction, frame:plib.engine.Frame, condition:Bool)
 	{
 		if (condition)
 		{

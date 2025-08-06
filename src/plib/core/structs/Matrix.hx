@@ -1,7 +1,4 @@
-package core.structs;
-
-import core.structs.Direction.DirectionType;
-import core.structs.Direction;
+package plib.core.structs;
 
 class Matrix<T>
 {
@@ -24,7 +21,7 @@ class Matrix<T>
 		data = [for (_ in 0...size) def];
 	}
 
-	public function countSameNeighbors(x:Int, y:Int, type:DirectionType)
+	public function countSameNeighbors(x:Int, y:Int, dirs:Array<plib.Direction>)
 	{
 		final val = get(x, y);
 		if (val == null)
@@ -34,7 +31,7 @@ class Matrix<T>
 		var xx:Int = 0;
 		var yy:Int = 0;
 
-		for (dir in Direction.getDirs(type))
+		for (dir in dirs)
 		{
 			xx = x + dir.x;
 			yy = y + dir.y;

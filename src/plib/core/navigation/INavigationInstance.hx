@@ -1,4 +1,4 @@
-package core.navigation;
+package plib.core.navigation;
 
 interface INavigationInstance
 {

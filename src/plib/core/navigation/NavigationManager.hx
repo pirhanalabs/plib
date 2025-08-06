@@ -1,4 +1,4 @@
-package core.navigation;
+package plib.core.navigation;
 
 class NavigationManager
 {
@@ -51,14 +51,14 @@ class NavigationManager
 	/**
 		Link the first instance to the second one, in the given direction.
 	**/
-	public function link(instance1:INavigationInstance, instance2:INavigationInstance, direction:engine.Direction)
+	public function link(instance1:INavigationInstance, instance2:INavigationInstance, direction:plib.Direction)
 	{
 		var node1 = getOrCreate(instance1);
 		var node2 = getOrCreate(instance2);
 		node1.link(node2, direction);
 	}
 
-	public function link2(instance1:INavigationInstance, instance2:INavigationInstance, direction:engine.Direction)
+	public function link2(instance1:INavigationInstance, instance2:INavigationInstance, direction:plib.Direction)
 	{
 		link(instance1, instance2, direction);
 		link(instance2, instance1, direction.getReverse());
@@ -75,7 +75,7 @@ class NavigationManager
 	/**
 		Move from the current selected instance in a given direction, if possible.
 	**/
-	public function tryMove(direction:engine.Direction)
+	public function tryMove(direction:plib.Direction)
 	{
 		if (current == null || interactionsDisabled)
 			return false;

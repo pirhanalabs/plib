@@ -1,4 +1,4 @@
-package core.navigation;
+package plib.core.navigation;
 
 typedef PortalTarget =
 {
@@ -12,7 +12,7 @@ class NavigationGroupManager
 	public var currentGroup(get, null):NavigationManager;
 
 	private var lastFocused:Map<NavigationManager, INavigationInstance>;
-	private var portals:Map<INavigationInstance, Map<engine.Direction, PortalTarget>>;
+	private var portals:Map<INavigationInstance, Map<plib.Direction, PortalTarget>>;
 
 	public function new()
 	{
@@ -20,7 +20,7 @@ class NavigationGroupManager
 		currentGroup = null;
 
 		lastFocused = new Map<NavigationManager, INavigationInstance>();
-		portals = new Map<INavigationInstance, Map<engine.Direction, PortalTarget>>();
+		portals = new Map<INavigationInstance, Map<plib.Direction, PortalTarget>>();
 	}
 
 	public function getCurrentGroupIndex():Int
@@ -132,7 +132,7 @@ class NavigationGroupManager
 	/**
 		Adds a portal from a node to a specific node in another navigation manager.
 	**/
-	public function addPortalToNode(from:INavigationInstance, direction:engine.Direction, toNav:NavigationManager, to:INavigationInstance)
+	public function addPortalToNode(from:INavigationInstance, direction:plib.Direction, toNav:NavigationManager, to:INavigationInstance)
 	{
 		addPortalInternal(from, direction, toNav, to);
 	}
@@ -140,16 +140,16 @@ class NavigationGroupManager
 	/**
 		Adds a portal from a node to the navigation manager itself, allowing for navigation to any node in that manager.
 	**/
-	public function addPortalToNav(from:INavigationInstance, direction:engine.Direction, toNav:NavigationManager)
+	public function addPortalToNav(from:INavigationInstance, direction:plib.Direction, toNav:NavigationManager)
 	{
 		addPortalInternal(from, direction, toNav, null);
 	}
 
-	private function addPortalInternal(from:INavigationInstance, direction:engine.Direction, toNav:NavigationManager, to:INavigationInstance)
+	private function addPortalInternal(from:INavigationInstance, direction:plib.Direction, toNav:NavigationManager, to:INavigationInstance)
 	{
 		if (!portals.exists(from))
 		{
-			portals.set(from, new Map<engine.Direction, PortalTarget>());
+			portals.set(from, new Map<plib.Direction, PortalTarget>());
 		}
 		portals.get(from).set(direction, {targetGroup: toNav, targetNode: to});
 	}
@@ -158,7 +158,7 @@ class NavigationGroupManager
 		Tries to move from the current node in the given direction via a portal.
 		Returns true if a portal was used, false otherwise.
 	**/
-	public function tryMove(currentNode:INavigationInstance, direction:engine.Direction):Bool
+	public function tryMove(currentNode:INavigationInstance, direction:plib.Direction):Bool
 	{
 		if (portals.exists(currentNode))
 		{

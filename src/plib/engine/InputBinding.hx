@@ -8,8 +8,8 @@ class InputBinding
 
 	private var manager:InputManager;
 
-	@:allow(engine.InputManager)
-	private function new(c:InputManager, key:Int, button:engine.PadButton)
+	@:allow(plib.engine.InputManager)
+	private function new(c:InputManager, key:Int, button:plib.engine.PadButton)
 	{
 		this.manager = c;
 		this.key = key;

@@ -1,4 +1,4 @@
-package core.structs;
+package plib.core.structs;
 
 abstract SimpleEventListener(Array<Void->Void>)
 {

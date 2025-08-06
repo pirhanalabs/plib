@@ -1,11 +1,11 @@
-package core.navigation;
+package plib.core.navigation;
 
 class NavigationNode
 {
 	public var instance:INavigationInstance;
-	public var previous:Map<engine.Direction, NavigationNode>;
+	public var previous:Map<plib.Direction, NavigationNode>;
 
-	private var links:Map<engine.Direction, NavigationNode>;
+	private var links:Map<plib.Direction, NavigationNode>;
 
 	/**
 		Handles a navigation instance and all its linked nodes.
@@ -13,14 +13,14 @@ class NavigationNode
 	public function new(instance:INavigationInstance)
 	{
 		this.instance = instance;
-		this.links = new Map<engine.Direction, NavigationNode>();
+		this.links = new Map<plib.Direction, NavigationNode>();
 		previous = [];
 	}
 
 	/**
 		Link this node to another one in given direction.
 	**/
-	public function link(node:NavigationNode, direction:engine.Direction)
+	public function link(node:NavigationNode, direction:plib.Direction)
 	{
 		if (links.exists(direction))
 			return false;
@@ -37,7 +37,7 @@ class NavigationNode
 	/**
 		Returns the link (if any) in given direction.
 	**/
-	public function getLink(direction:engine.Direction)
+	public function getLink(direction:plib.Direction)
 	{
 		var reverse = direction.getReverse();
 		if (previous.exists(reverse))

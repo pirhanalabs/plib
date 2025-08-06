@@ -1,4 +1,4 @@
-package core.structs;
+package plib.core.structs;
 
 abstract Point({x:Float, y:Float})
 {
