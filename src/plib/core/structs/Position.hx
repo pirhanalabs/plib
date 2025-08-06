@@ -1,8 +1,10 @@
-package core.structs;
+package plib.core.structs;
 
-abstract Position({x:Int, y:Int}) {
+abstract Position({x:Float, y:Float}) {
 	public var x(get, set):Int;
 	public var y(get, set):Int;
+	public var xf(get, set):Float;
+	public var yf(get, set):Float;
 
 	public static function distance(first:Position, other:Position) {
 		final dx = first.x - other.x;
@@ -10,12 +12,28 @@ abstract Position({x:Int, y:Int}) {
 		return Math.sqrt(dx * dx + dy * dy);
 	}
 
-	inline function get_x() {
+	inline function get_xf(){
 		return this.x;
 	}
 
-	inline function get_y() {
+	inline function get_yf(){
 		return this.y;
+	}
+
+	inline function set_xf(val:Float){
+		return this.x = val;
+	}
+
+	inline function set_yf(val:Float){
+		return this.y = val;
+	}
+
+	inline function get_x() {
+		return Std.int(this.x);
+	}
+
+	inline function get_y() {
+		return Std.int(this.y);
 	}
 
 	inline function set_x(val:Int) {
