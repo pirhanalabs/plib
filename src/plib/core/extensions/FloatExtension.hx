@@ -1,4 +1,4 @@
-package core.extensions;
+package plib.core.extensions;
 
 class FloatExtension{
 
