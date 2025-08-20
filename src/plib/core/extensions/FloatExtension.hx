@@ -13,4 +13,8 @@ class FloatExtension{
         final d = Math.pow(10, precision);
         return Math.round(me * d) / d;
     }
+
+    public static inline function clamp(me:Float, min:Float, max:Float):Float{
+        return me < min ? min : me > max ? max : me;
+    }
 }
