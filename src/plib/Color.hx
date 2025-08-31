@@ -35,7 +35,7 @@ abstract Color(Int) from Int to Int
 	}
 
 	public inline function toVector(){
-		return new h3d.Vector(rf, gf, bf);
+		return new h3d.Vector4(rf, gf, bf, af);
 	}
 
 	inline function get_ri()
