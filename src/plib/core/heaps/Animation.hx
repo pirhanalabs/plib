@@ -1,5 +1,7 @@
 package plib.core.heaps;
 
+using plib.core.extensions.FloatExtension;
+
 class Animation extends h2d.Drawable
 {
 	public var loop:Bool = true;
