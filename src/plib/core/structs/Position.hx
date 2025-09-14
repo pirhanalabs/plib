@@ -12,19 +12,19 @@ abstract Position({x:Float, y:Float}) {
 		return Math.sqrt(dx * dx + dy * dy);
 	}
 
-	inline function get_xf(){
+	inline function get_xf() {
 		return this.x;
 	}
 
-	inline function get_yf(){
+	inline function get_yf() {
 		return this.y;
 	}
 
-	inline function set_xf(val:Float){
+	inline function set_xf(val:Float) {
 		return this.x = val;
 	}
 
-	inline function set_yf(val:Float){
+	inline function set_yf(val:Float) {
 		return this.y = val;
 	}
 
@@ -37,14 +37,16 @@ abstract Position({x:Float, y:Float}) {
 	}
 
 	inline function set_x(val:Int) {
-		return this.x = val;
+		this.x = val;
+		return x;
 	}
 
 	inline function set_y(val:Int) {
-		return this.y = val;
+		this.y = val;
+		return y;
 	}
 
-	public function new(x:Int, y:Int, ?id:Int) {
+	public function new(x:Float, y:Float, ?id:Int) {
 		this = {x: x, y: y};
 	}
 
