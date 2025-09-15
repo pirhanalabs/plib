@@ -79,10 +79,9 @@ class Camera
 			needRepositioning = false;
 		}
 
-		if (ob2x != 0 || ob2y != 0)
-		{
-			ob2.x = ob2x;
-			ob2.y = ob2y;
-		}
+		
+		ob2.x = ob2x;
+		ob2.y = ob2y;
+		
 	}
 }
