@@ -18,6 +18,8 @@ class Camera
 	var shakeTime:Float = 0.0;
 	var shakeTimeMax:Float = 0.0;
 
+	public var shakeStrength:Float = 2.0;
+
 	/**
 		A camera system that affects its `ctx`.
 	**/
@@ -62,7 +64,7 @@ class Camera
 		if (shakeTime > 0)
 		{
 			shakeTime -= frame.dt;
-			ob2x = MathTools.sign(Math.sin(frame.frames) * 30 * frame.tmod) * 2 * shakeTime / shakeTimeMax;
+			ob2x = MathTools.sign(Math.sin(frame.frames) * 30 * frame.tmod) * shakeStrength * shakeTime / shakeTimeMax;
 		}
 	}
 
