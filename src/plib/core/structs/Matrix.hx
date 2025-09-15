@@ -33,8 +33,8 @@ class Matrix<T>
 
 		for (dir in dirs)
 		{
-			xx = x + dir.x;
-			yy = y + dir.y;
+			xx = x + dir.dx;
+			yy = y + dir.dy;
 			if (!inbounds(xx, yy))
 			{
 				score++;
