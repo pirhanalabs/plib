@@ -2,6 +2,8 @@ package plib.engine;
 
 class Frame
 {
+	public var mod:Float = 1.0;
+
 	/**
 		the seconds since last frame.
 	**/
@@ -39,9 +41,9 @@ class Frame
 	@:allow(plib.engine.IApplication)
 	private function update()
 	{
-		dt = hxd.Timer.elapsedTime;
+		dt = hxd.Timer.elapsedTime * mod;
 		fps = hxd.Timer.fps();
-		tmod = hxd.Timer.tmod;
+		tmod = hxd.Timer.tmod * mod;
 
 		frames++;
 		elapsed += dt;
