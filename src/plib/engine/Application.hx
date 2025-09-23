@@ -1,6 +1,5 @@
 package plib.engine;
 
-
 class Application extends hxd.App
 {
 	private static var instance:Application;
@@ -180,7 +179,7 @@ class Application extends hxd.App
 
 		if (screenCount > 0)
 		{
-			screens[screenCount - 1].update(frame);
+			screens[screenCount - 1].__update(frame);
 		}
 	}
 
@@ -190,7 +189,7 @@ class Application extends hxd.App
 
 		if (screenCount > 0)
 		{
-			screens[screenCount - 1].postupdate();
+			screens[screenCount - 1].__postupdate();
 		}
 
 		if (bordersInvalidated)

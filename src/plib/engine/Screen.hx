@@ -3,13 +3,17 @@ package plib.engine;
 using plib.core.extensions.ArrayExtension;
 
 @:allow(plib.engine.Application)
-class Screen
+class Screen extends UpdateTreeNode
 {
-	
 	var app:plib.engine.Application;
 	var root:h2d.Layers;
 	var camera:plib.engine.Camera;
 	var animator:plib.core.animator.Animator;
+
+	private function new()
+	{
+		super();
+	}
 
 	/**
 		Called when added to the screen stack, before `ready()`.
@@ -23,6 +27,8 @@ class Screen
 		animator = new plib.core.animator.Animator(64);
 		camera = new plib.engine.Camera(root);
 		camera.setViewport(app.vw, app.vh);
+		addChild(animator);
+		addChild(camera);
 	}
 
 	/**
@@ -38,13 +44,19 @@ class Screen
 		If the screen was unfocused and becomes focused, this will trigger. 
 		Override this in subclasses to add behavior.
 	**/
-	private function focus() {}
+	private function focus()
+	{
+		this.paused = false;
+	}
 
 	/** 
 		Triggers whenever the screen becomes unfocused, like when it becomes overlayed by another screen. 
 		Override this in subclasses to add behavior.
 	**/
-	private function unfocus() {}
+	private function unfocus()
+	{
+		this.paused = true;
+	}
 
 	/**
 		Triggers the frame the window has been resized.
@@ -56,25 +68,17 @@ class Screen
 		Triggers when the screen is removed from the screen stack.
 		Override this in subclasses to add behavior.
 	**/
-	private function dispose() {}
+	override function dispose() {}
 
 	/** 
 		Triggers once per frame. Use this to update game data.
 		Override this in subclasses to add behavior.
 	**/
-	private function update(frame:plib.engine.Frame)
-	{
-		animator.update(frame);
-		camera.update(frame);
-	}
+	override function update(frame:plib.engine.Frame) {}
 
 	/** 
 		Triggers once per frame. Use this to update game visuals.
 		Override this in subclasses to add behavior.
 	**/
-	private function postupdate()
-	{
-		animator.postupdate();
-		camera.postupdate();
-	}
+	override function postupdate() {}
 }

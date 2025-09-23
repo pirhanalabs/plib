@@ -1,6 +1,6 @@
 package plib.engine;
 
-class Camera
+class Camera extends UpdateTreeNode
 {
 	@:allow(plib.engine.Application)
 	var ob1:h2d.Object; // camera container
@@ -15,16 +15,21 @@ class Camera
 	var ob3y:Float;
 	var needRepositioning:Bool;
 
-	var shakeTime:Float = 0.0;
-	var shakeTimeMax:Float = 0.0;
+	var shakeTime:Float;
+	var shakeTimeMax:Float;
+	var shakeStrength:Float;
 
-	public var shakeStrength:Float = 2.0;
+	var bumpx:Float;
+	var bumpy:Float;
+
+	public var bumpMod:Float = 0.64;
 
 	/**
 		A camera system that affects its `ctx`.
 	**/
 	public function new(ctx:h2d.Object)
 	{
+		super();
 		ob1 = new h2d.Object();
 		ob2 = new h2d.Object(ob1);
 		ob3 = new h2d.Object(ob2);
@@ -37,6 +42,13 @@ class Camera
 		ob3x = 0;
 		ob3y = 0;
 		needRepositioning = true;
+
+		shakeTime = 0.0;
+		shakeTimeMax = 0.0;
+		shakeStrength = 2.0;
+
+		bumpx = 0;
+		bumpy = 0;
 	}
 
 	public function setViewport(vw:Int, vh:Int)
@@ -48,16 +60,23 @@ class Camera
 		needRepositioning = true;
 	}
 
-	public function shake(seconds:Float)
+	public function bump(dx:Float, dy:Float)
+	{
+		bumpx = dx;
+		bumpy = dy;
+	}
+
+	public function shake(seconds:Float, strength:Float = 2.0)
 	{
 		if (this.shakeTime > seconds)
 			return;
 
 		this.shakeTime = seconds;
 		this.shakeTimeMax = seconds;
+		this.shakeStrength = strength;
 	}
 
-	public function update(frame:plib.engine.Frame)
+	override function update(frame:plib.engine.Frame)
 	{
 		ob2x = 0;
 
@@ -65,10 +84,30 @@ class Camera
 		{
 			shakeTime -= frame.dt;
 			ob2x = MathTools.sign(Math.sin(frame.frames) * 30 * frame.tmod) * shakeStrength * shakeTime / shakeTimeMax;
+			ob2y = MathTools.sign(Math.cos(frame.frames) * 30 * frame.tmod) * shakeStrength * shakeTime / shakeTimeMax;
+		}
+
+		if (bumpx != 0)
+		{
+			bumpx *= bumpMod * frame.tmod;
+			if (MathTools.fabs(bumpx) < 0.01)
+			{
+				bumpx = 0;
+			}
+		}
+
+		if (bumpy != 0)
+		{
+			bumpy *= bumpMod * frame.tmod;
+
+			if (MathTools.fabs(bumpy) < 0.01)
+			{
+				bumpy = 0;
+			}
 		}
 	}
 
-	public function postupdate()
+	override function postupdate()
 	{
 		if (needRepositioning)
 		{
@@ -80,10 +119,7 @@ class Camera
 			ob3.y = ob3y;
 			needRepositioning = false;
 		}
-
-		
-		ob2.x = ob2x;
-		ob2.y = ob2y;
-		
+		ob2.x = ob2x + bumpx;
+		ob2.y = ob2y + bumpy;
 	}
 }

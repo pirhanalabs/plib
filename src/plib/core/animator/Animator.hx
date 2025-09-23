@@ -1,6 +1,6 @@
 package plib.core.animator;
 
-class Animator
+class Animator extends plib.engine.UpdateTreeNode
 {
 	var queue:plib.core.structs.Queue<AnimatorNode>;
 	var queueCur:Null<AnimatorNode>;
@@ -15,6 +15,7 @@ class Animator
 
 	public function new(limit = 64)
 	{
+		super();
 		queue = new plib.core.structs.Queue(limit);
 		unqueued = [];
 		unqueuedCount = 0;
@@ -60,7 +61,7 @@ class Animator
 
 	public function pauseUnqueued(paused:Bool) {}
 
-	public function update(frame:plib.engine.Frame)
+	override function update(frame:plib.engine.Frame)
 	{
 		// skip frame
 		if (skip)
@@ -106,7 +107,7 @@ class Animator
 		}
 	}
 
-	public function postupdate()
+	override function postupdate()
 	{
 		// postupdate unqueued
 		for (node in unqueued)
