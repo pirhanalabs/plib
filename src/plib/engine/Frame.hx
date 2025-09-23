@@ -35,10 +35,10 @@ class Frame
 	**/
 	public var frames(default, null):Float = 0;
 
-	@:allow(plib.engine.IApplication)
+	@:allow(plib.engine.Application)
 	private function new() {}
 
-	@:allow(plib.engine.IApplication)
+	@:allow(plib.engine.Application)
 	private function update()
 	{
 		dt = hxd.Timer.elapsedTime * mod;

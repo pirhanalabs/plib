@@ -1,7 +1,7 @@
 package plib.engine;
 
 
-class Application extends hxd.App implements IApplication
+class Application extends hxd.App
 {
 	private static var instance:Application;
 
@@ -13,10 +13,10 @@ class Application extends hxd.App implements IApplication
 	}
 
 	// accessors
-	private var window:hxd.Window;
-	private var frame:plib.engine.Frame;
-	private var cursor:plib.engine.CustomCursor;
-	private var inputs:plib.engine.InputManager;
+	public var window(default, null):hxd.Window;
+	public var frame(default, null):plib.engine.Frame;
+	public var cursor(default, null):plib.engine.CustomCursor;
+	public var inputs(default, null):plib.engine.InputManager;
 
 	public var vw(default, null):Int;
 	public var vh(default, null):Int;
@@ -139,7 +139,6 @@ class Application extends hxd.App implements IApplication
 				case EPush:
 				case ERelease:
 				case EMove:
-					// cursor.onMove(e);
 				case EOver:
 				case EOut:
 				case EWheel:
@@ -305,19 +304,5 @@ class Application extends hxd.App implements IApplication
 	inline function getCurrentScreen()
 	{
 		return screens[screenCount - 1];
-	}
-
-	public inline function getWindow()
-	{
-		return this.window;
-	}
-
-	public inline function getCursor()
-	{
-		return this.cursor;
-	}
-
-	public inline function getFrame(){
-		return this.frame;
 	}
 }

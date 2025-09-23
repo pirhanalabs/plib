@@ -80,7 +80,7 @@ class InputManager
 
 	public function isAnalogPressed(dir:plib.Direction)
 	{
-		return analogInputs[dir.id] == Application.get().getFrame().frames - 1;
+		return analogInputs[dir.id] == Application.get().frame.frames - 1;
 	}
 
 	public function isAnalogDown(dir:plib.Direction)
@@ -90,7 +90,7 @@ class InputManager
 
 	public function isAnalogReleased(dir:plib.Direction)
 	{
-		return analogInputs[dir.id] == -Application.get().getFrame().frames;
+		return analogInputs[dir.id] == -Application.get().frame.frames;
 	}
 
 	@:allow(plib.engine.Application)

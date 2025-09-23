@@ -2,30 +2,27 @@ package plib.engine;
 
 using plib.core.extensions.ArrayExtension;
 
-@:allow(plib.engine.IApplication)
+@:allow(plib.engine.Application)
 class Screen
 {
 	
-	var app:plib.engine.IApplication;
+	var app:plib.engine.Application;
 	var root:h2d.Layers;
 	var camera:plib.engine.Camera;
 	var animator:plib.core.animator.Animator;
-	var updateables:Array<IUpdateable>;
 
 	/**
 		Called when added to the screen stack, before `ready()`.
 		This is to initialize the camera, mainly.
 	**/
 	@:noCompletion
-	private final function __init(app:IApplication)
+	private final function __init(app:Application)
 	{
 		this.app = app;
 		this.root = new h2d.Layers();
 		animator = new plib.core.animator.Animator(64);
 		camera = new plib.engine.Camera(root);
 		camera.setViewport(app.vw, app.vh);
-
-		updateables = new Array<IUpdateable>();
 	}
 
 	/**
@@ -69,16 +66,6 @@ class Screen
 	{
 		animator.update(frame);
 		camera.update(frame);
-
-		updateables.fastUnsortedFilter(u -> !u.isDisposed());
-
-		for (u in updateables)
-		{
-			if (!u.isDisposed())
-			{
-				u.update(frame);
-			}
-		}
 	}
 
 	/** 
@@ -89,13 +76,5 @@ class Screen
 	{
 		animator.postupdate();
 		camera.postupdate();
-
-		for (u in updateables)
-		{
-			if (!u.isDisposed())
-			{
-				u.postupdate();
-			}
-		}
 	}
 }
