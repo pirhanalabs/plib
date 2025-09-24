@@ -269,6 +269,20 @@ class Application extends hxd.App
 	}
 	#end
 
+	public function maximizeWindow()
+	{
+		#if (hlsdl || hldx)
+		@:privateAccess window.window.maximize();
+		#end
+	}
+
+	public function setWindowPosition(x:Int, y:Int)
+	{
+		#if (hlsdl || hldx)
+		@:privateAccess window.window.setPosition(x, y);
+		#end
+	}
+
 	public function pushScreen(screen:Screen):Void
 	{
 		if (screenCount > 0)
