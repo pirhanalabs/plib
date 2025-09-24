@@ -44,6 +44,9 @@ class Application extends hxd.App
 	private var screens:Array<Screen>;
 	private var screenCount:Int;
 
+	private var globalMouseX(get, never):Int;
+	private var globalMouseY(get, never):Int;
+
 	private function new(vw:Int, vh:Int)
 	{
 		super();
@@ -148,7 +151,6 @@ class Application extends hxd.App
 				case EReleaseOutside:
 				case ETextInput:
 				case ECheck:
-				default:
 			}
 		});
 	}
@@ -317,5 +319,15 @@ class Application extends hxd.App
 	inline function getCurrentScreen()
 	{
 		return screens[screenCount - 1];
+	}
+
+	inline function get_globalMouseX()
+	{
+		return Std.int(s2d.mouseX);
+	}
+
+	inline function get_globalMouseY()
+	{
+		return Std.int(s2d.mouseY);
 	}
 }
