@@ -36,9 +36,25 @@ abstract Color(Int) from Int to Int
 
 	public inline function colorizeBatchElement(e:h2d.SpriteBatch.BatchElement, ratio:Float)
 	{
-		e.r = Math.floor(Tween.lerp(0xffffff, rf, ratio));
-		e.g = Math.floor(Tween.lerp(0xffffff, gf, ratio));
-		e.b = Math.floor(Tween.lerp(0xffffff, bf, ratio));
+		e.r = Tween.lerp(1, rf, ratio);
+		e.g = Tween.lerp(1, gf, ratio);
+		e.b = Tween.lerp(1, bf, ratio);
+	}
+
+	/** Interpolate to given color, at % ratio **/
+	public inline function interpolate(to:Color, ratio:Float):Color
+	{
+		if (ratio <= 0)
+			return this;
+		if (ratio >= 1)
+			return to;
+
+		var a = Math.round(Tween.lerp(ai, to.ai, ratio)) << 24;
+		var r = Math.round(Tween.lerp(ri, to.ri, ratio)) << 16;
+		var g = Math.round(Tween.lerp(gi, to.gi, ratio)) << 8;
+		var b = Math.round(Tween.lerp(bi, to.bi, ratio));
+
+		return a | r | g | b;
 	}
 
 	public inline function toVector()
