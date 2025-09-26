@@ -36,9 +36,9 @@ abstract Color(Int) from Int to Int
 
 	public inline function colorizeBatchElement(e:h2d.SpriteBatch.BatchElement, ratio:Float)
 	{
-		e.r = M.lerp(0xffffff, rf, ratio);
-		e.g = M.lerp(0xffffff, gf, ratio);
-		e.b = M.lerp(0xffffff, bf, ratio);
+		e.r = Tween.lerp(0xffffff, rf, ratio);
+		e.g = Tween.lerp(0xffffff, gf, ratio);
+		e.b = Tween.lerp(0xffffff, bf, ratio);
 	}
 
 	public inline function toVector()
