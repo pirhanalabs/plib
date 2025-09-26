@@ -34,7 +34,15 @@ abstract Color(Int) from Int to Int
 				ratio)) << 16) | (Math.round(Tween.lerp(gi, to.gi, ratio)) << 8) | (Math.round(Tween.lerp(bi, to.bi, ratio)));
 	}
 
-	public inline function toVector(){
+	public inline function colorizeBatchElement(e:h2d.SpriteBatch.BatchElement, ratio:Float)
+	{
+		e.r = M.lerp(0xffffff, rf, ratio);
+		e.g = M.lerp(0xffffff, gf, ratio);
+		e.b = M.lerp(0xffffff, bf, ratio);
+	}
+
+	public inline function toVector()
+	{
 		return new h3d.Vector4(rf, gf, bf, af);
 	}
 
