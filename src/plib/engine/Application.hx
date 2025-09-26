@@ -271,6 +271,19 @@ class Application extends hxd.App
 	}
 	#end
 
+	public function mouseToLocal(obj:h2d.Object)
+	{
+		var p = obj.globalToLocal(new h2d.col.Point(globalMouseX, globalMouseY));
+		return p;
+	}
+
+	public function isMouseOver(obj:h2d.Object)
+	{
+		var p = mouseToLocal(obj);
+		var s = obj.getSize();
+		return p.x >= 0 && p.y >= 0 && p.x < s.width && p.y < s.height;
+	}
+
 	public function maximizeWindow()
 	{
 		#if (hlsdl || hldx)
