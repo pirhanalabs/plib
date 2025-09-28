@@ -3,6 +3,26 @@ package plib.core.extensions;
 class ArrayExtension
 {
 	/**
+		A dumber, more streamlined version of reduce, only for calculating total of values.
+	**/
+	public inline static function totalize<T:Float>(a:Array<T>):T
+	{
+		return reduce(a, (acc, n) -> acc + n, cast 0);
+	}
+
+	/**
+		Equivalent of javascript reduce() method, but for numerical values only.
+	**/
+	public inline static function reduce<T:Float>(a:Array<T>, fn:(acc:T, val:T) -> T, acc:T):T
+	{
+		for (el in a)
+		{
+			acc = fn(acc, el);
+		}
+		return acc;
+	}
+
+	/**
 		Fast way to filter the array without allocating a new array.
 		This method is fastest, but does not keep the array order.
 		Speed 0(n)

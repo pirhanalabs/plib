@@ -2,6 +2,7 @@ import plib.MathTools;
 import plib.engine.Application;
 import plib.engine.Frame;
 
+using plib.core.extensions.ArrayExtension;
 using plib.core.extensions.IterableExtension;
 
 class TestScreen extends plib.engine.Screen
@@ -16,6 +17,8 @@ class TestScreen extends plib.engine.Screen
 
 		trace('iterable test 1: ' + [0, 0, 0, 1].every(n -> n == 0));
 		trace('iterable test 2: ' + [0, 0, 0, 0].every(n -> n == 0));
+		trace('reduce test: ' + [1, 2, 3, 4].reduce((acc, n) -> acc + n, 0));
+		trace('totalize test: ' + [1, 2, 3, 4].totalize());
 	}
 
 	override function ready()
