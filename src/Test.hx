@@ -2,6 +2,8 @@ import plib.MathTools;
 import plib.engine.Application;
 import plib.engine.Frame;
 
+using plib.core.extensions.IterableExtension;
+
 class TestScreen extends plib.engine.Screen
 {
 	var obj:h2d.Bitmap;
@@ -11,6 +13,9 @@ class TestScreen extends plib.engine.Screen
 	public function new()
 	{
 		super();
+
+		trace('iterable test 1: ' + [0, 0, 0, 1].every(n -> n == 0));
+		trace('iterable test 2: ' + [0, 0, 0, 0].every(n -> n == 0));
 	}
 
 	override function ready()

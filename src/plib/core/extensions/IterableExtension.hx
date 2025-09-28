@@ -46,6 +46,23 @@ class IterableExtension
 		return min;
 	}
 
+	/**
+		returns true if all elements meet `fn` requirement.
+	**/
+	public static inline function every<T>(i:Iterable<T>, fn:T->Bool)
+	{
+		var success = true;
+		for (el in i)
+		{
+			if (!fn(el))
+			{
+				success = false;
+				break;
+			}
+		}
+		return success;
+	}
+
 	public static inline function has<T>(i:Iterable<T>, item:T)
 	{
 		return Lambda.has(i, item);
