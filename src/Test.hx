@@ -19,6 +19,7 @@ class TestScreen extends plib.engine.Screen
 		trace('iterable test 2: ' + [0, 0, 0, 0].every(n -> n == 0));
 		trace('reduce test: ' + [1, 2, 3, 4].reduce((acc, n) -> acc + n, 0));
 		trace('totalize test: ' + [1, 2, 3, 4].totalize());
+		trace('average test: ' + [1, 2, 3, 4].average());
 	}
 
 	override function ready()

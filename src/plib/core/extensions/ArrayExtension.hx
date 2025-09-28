@@ -3,6 +3,14 @@ package plib.core.extensions;
 class ArrayExtension
 {
 	/**
+		Returns the average of all values in a array.
+	**/
+	public inline static function average<T:Float>(a:Array<T>):Float
+	{
+		return totalize(a) / a.length;
+	}
+
+	/**
 		A dumber, more streamlined version of reduce, only for calculating total of values.
 	**/
 	public inline static function totalize<T:Float>(a:Array<T>):T
