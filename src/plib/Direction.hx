@@ -47,4 +47,9 @@ class Direction
 		var m = Math.floor(this.id / 4) * 4;
 		return D8[m + (this.id + 2) % 4];
 	}
+
+	public inline function toEDir()
+	{
+		return EDirection.fromDirection(this);
+	}
 }

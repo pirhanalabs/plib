@@ -132,7 +132,7 @@ class NavigationGroupManager
 	/**
 		Adds a portal from a node to a specific node in another navigation manager.
 	**/
-	public function addPortalToNode(from:INavigationInstance, direction:plib.Direction, toNav:NavigationManager, to:INavigationInstance)
+	public function addPortalToNode(from:INavigationInstance, direction:plib.EDirection, toNav:NavigationManager, to:INavigationInstance)
 	{
 		addPortalInternal(from, direction, toNav, to);
 	}
@@ -140,12 +140,12 @@ class NavigationGroupManager
 	/**
 		Adds a portal from a node to the navigation manager itself, allowing for navigation to any node in that manager.
 	**/
-	public function addPortalToNav(from:INavigationInstance, direction:plib.Direction, toNav:NavigationManager)
+	public function addPortalToNav(from:INavigationInstance, direction:plib.EDirection, toNav:NavigationManager)
 	{
 		addPortalInternal(from, direction, toNav, null);
 	}
 
-	private function addPortalInternal(from:INavigationInstance, direction:plib.Direction, toNav:NavigationManager, to:INavigationInstance)
+	private function addPortalInternal(from:INavigationInstance, direction:plib.EDirection, toNav:NavigationManager, to:INavigationInstance)
 	{
 		if (!portals.exists(from))
 		{
@@ -158,7 +158,7 @@ class NavigationGroupManager
 		Tries to move from the current node in the given direction via a portal.
 		Returns true if a portal was used, false otherwise.
 	**/
-	public function tryMove(currentNode:INavigationInstance, direction:plib.Direction):Bool
+	public function tryMove(currentNode:INavigationInstance, direction:plib.EDirection):Bool
 	{
 		if (portals.exists(currentNode))
 		{

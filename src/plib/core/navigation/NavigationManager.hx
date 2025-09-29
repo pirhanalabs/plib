@@ -6,11 +6,13 @@ class NavigationManager
 	public var interactionsDisabled(default, null):Bool;
 	public var groupManager:Null<NavigationGroupManager>;
 
-	@:allow(core.navigation.NavigationGroupManager)
+	@:allow(plib.core.navigation.NavigationGroupManager)
 	private var instances:Map<INavigationInstance, NavigationNode>;
 
 	/**
 		Manages the navigation between interconnected INavigationInstance instances.
+
+		To initialize the navigation, call myNav.select(firstFocusedInstance)
 	**/
 	public function new()
 	{
@@ -51,17 +53,17 @@ class NavigationManager
 	/**
 		Link the first instance to the second one, in the given direction.
 	**/
-	public function link(instance1:INavigationInstance, instance2:INavigationInstance, direction:plib.Direction)
+	public function link(instance1:INavigationInstance, instance2:INavigationInstance, direction:plib.EDirection)
 	{
 		var node1 = getOrCreate(instance1);
 		var node2 = getOrCreate(instance2);
 		node1.link(node2, direction);
 	}
 
-	public function link2(instance1:INavigationInstance, instance2:INavigationInstance, direction:plib.Direction)
+	public function link2(instance1:INavigationInstance, instance2:INavigationInstance, direction:plib.EDirection)
 	{
 		link(instance1, instance2, direction);
-		link(instance2, instance1, direction.getReverse());
+		link(instance2, instance1, direction.reverse());
 	}
 
 	public function clearLinks()
@@ -85,7 +87,7 @@ class NavigationManager
 	/**
 		Move from the current selected instance in a given direction, if possible.
 	**/
-	public function tryMove(direction:plib.Direction)
+	public function tryMove(direction:plib.EDirection)
 	{
 		if (current == null || interactionsDisabled)
 			return false;

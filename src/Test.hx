@@ -5,11 +5,47 @@ import plib.engine.Frame;
 using plib.core.extensions.ArrayExtension;
 using plib.core.extensions.IterableExtension;
 
+class TestNavItem extends plib.core.navigation.BasicNavigationInstance
+{
+	var g:h2d.Bitmap;
+	var t1 = h2d.Tile.fromColor(0xffa500, 16, 16);
+	var t2 = h2d.Tile.fromColor(0x00ff00, 16, 16);
+
+	public function new()
+	{
+		super();
+
+		g = new h2d.Bitmap(t1, this);
+	}
+
+	override function focus()
+	{
+		super.focus();
+		g.tile = t2;
+		trace('focused');
+	}
+
+	override function unfocus()
+	{
+		super.unfocus();
+		g.tile = t1;
+		trace('unfocused');
+	}
+
+	override function execute()
+	{
+		super.execute();
+		trace('executed!');
+	}
+}
+
 class TestScreen extends plib.engine.Screen
 {
 	var obj:h2d.Bitmap;
 	var velx:Float = 1;
 	var vely:Float = 1.5;
+
+	var nav = new plib.core.navigation.NavigationManager();
 
 	public function new()
 	{
@@ -41,6 +77,21 @@ class TestScreen extends plib.engine.Screen
 
 		obj = new h2d.Bitmap(h2d.Tile.fromColor(0xffa500, 16, 16));
 		root.add(obj, 1);
+
+		var options = [new TestNavItem(), new TestNavItem(), new TestNavItem(), new TestNavItem(),];
+
+		for (i in 0...options.length)
+		{
+			var o = options[i];
+			root.add(o, 2);
+
+			o.x = app.vw2 + MathTools.layout(20, options.length, i) - 10;
+			nav.add(o);
+		}
+
+		plib.core.navigation.NavigationHelper.buildLinear(nav, Dw, options);
+
+		nav.select(options[0]);
 	}
 
 	private function handleInputs()
@@ -49,6 +100,26 @@ class TestScreen extends plib.engine.Screen
 		{
 			camera.bump(0, -10);
 			camera.shake(0.1, 2);
+		}
+
+		// navigation
+		if (hxd.Key.isPressed(hxd.Key.A))
+		{
+			nav.tryMove(Lt);
+		}
+		else if (hxd.Key.isPressed(hxd.Key.D))
+		{
+			nav.tryMove(Rt);
+		}
+		else if (hxd.Key.isPressed(hxd.Key.S))
+		{
+			nav.tryMove(Dw);
+			trace('working?');
+		}
+		else if (hxd.Key.isPressed(hxd.Key.W))
+		{
+			nav.tryMove(Up);
+			trace('working?');
 		}
 	}
 
