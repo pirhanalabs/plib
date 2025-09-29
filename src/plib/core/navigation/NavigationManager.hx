@@ -73,6 +73,16 @@ class NavigationManager
 	}
 
 	/**
+		Remove all instances and links, but doesn't remove the 
+		instances from the scene, if they were added to it.
+	**/
+	public function clear()
+	{
+		current = null;
+		instances.clear();
+	}
+
+	/**
 		Move from the current selected instance in a given direction, if possible.
 	**/
 	public function tryMove(direction:plib.Direction)
