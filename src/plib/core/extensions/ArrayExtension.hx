@@ -72,26 +72,35 @@ class ArrayExtension
 
 	public static function each<T>(a:Array<T>, fn:T->Void)
 	{
-		for (val in a)
+		if (a != null)
 		{
-			fn(val);
+			for (val in a)
+			{
+				fn(val);
+			}
 		}
 	}
 
 	public static function ieach<T>(a:Array<T>, fn:T->Int->Void)
 	{
-		for (i in 0...a.length)
+		if (a != null)
 		{
-			var val = a[i];
-			fn(val, i);
+			for (i in 0...a.length)
+			{
+				var val = a[i];
+				fn(val, i);
+			}
 		}
 	}
 
 	public static function eachsafe<T>(a:Array<T>, fn:T->Void)
 	{
-		for (val in a.iterator())
+		if (a != null)
 		{
-			fn(val);
+			for (val in a.iterator())
+			{
+				fn(val);
+			}
 		}
 	}
 
