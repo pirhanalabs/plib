@@ -20,6 +20,19 @@ class TestScreen extends plib.engine.Screen
 		trace('reduce test: ' + [1, 2, 3, 4].reduce((acc, n) -> acc + n, 0));
 		trace('totalize test: ' + [1, 2, 3, 4].totalize());
 		trace('average test: ' + [1, 2, 3, 4].average());
+
+		trace('exact test 1: ' + [1, 2, 3, 4].exact(1, m -> m == 1));
+		trace('exact test 2: ' + [1, 2, 3, 4].exact(1, m -> m == 5));
+		trace('some test: ' + [1, 2, 3, 4].some(2, m -> m < 3));
+		trace('some test: ' + [1, 2, 3, 4].some(2, m -> m <= 3));
+		trace('some test: ' + [1, 2, 3, 4].some(2, m -> m < 2));
+		trace('any test: ' + [1, 2, 3, 4].any(m -> m == 4));
+		trace('any test: ' + [1, 2, 3, 4].any(m -> m == 5));
+
+		trace('max element test: ' + [1, 2, 3, 4].getMaxElement(m -> m));
+		trace('max value test: ' + [1, 2, 3, 4].getMaxValue(m -> m));
+		trace('min element test: ' + [1, 2, 3, 4].getMinElement(m -> m));
+		trace('min value test: ' + [1, 2, 3, 4].getMinValue(m -> m));
 	}
 
 	override function ready()
