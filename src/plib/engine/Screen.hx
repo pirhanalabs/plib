@@ -81,4 +81,33 @@ class Screen extends UpdateTreeNode
 		Override this in subclasses to add behavior.
 	**/
 	override function postupdate() {}
+
+	// **********************************************************
+	// 									 Common helper methods
+	// **********************************************************
+
+	/**
+		Centers an object horizontally on the screen.
+	**/
+	private inline function centerX(obj:h2d.Object)
+	{
+		obj.x = app.vw2 - obj.getSize().width * 0.5;
+	}
+
+	/**
+		Centers an object vertically on the screen.
+	**/
+	private inline function centerY(obj:h2d.Object)
+	{
+		obj.y = app.vh2 - obj.getSize().height * 0.5;
+	}
+
+	/**
+		Centers an object vertically and horizontally on the screen.
+	**/
+	private inline function centerXY(obj:h2d.Object)
+	{
+		centerX(obj);
+		centerY(obj);
+	}
 }
