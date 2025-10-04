@@ -115,4 +115,25 @@ class ArrayExtension
 			return MathTools.pick(a);
 		}
 	}
+
+	public static function pickExcept<T>(a:Array<T>, except:Array<T>, ?seed:hxd.Rand)
+	{
+		var index = 0;
+
+		if (seed != null)
+		{
+			index = MathTools.seeded_irand(0, a.length - 1, seed);
+		}
+		else
+		{
+			index = MathTools.irand(0, a.length - 1);
+		}
+
+		while (IterableExtension.has(except, a[index]))
+		{
+			index = (index + 1) % a.length;
+		}
+
+		return a[index];
+	}
 }
