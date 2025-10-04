@@ -51,6 +51,8 @@ class TestScreen extends plib.engine.Screen
 	{
 		super();
 
+		trace('test random sign:' + MathTools.randsign());
+
 		trace('iterable test 1: ' + [0, 0, 0, 1].every(n -> n == 0));
 		trace('iterable test 2: ' + [0, 0, 0, 0].every(n -> n == 0));
 		trace('reduce test: ' + [1, 2, 3, 4].reduce((acc, n) -> acc + n, 0));

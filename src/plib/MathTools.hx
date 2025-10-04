@@ -189,6 +189,14 @@ class MathTools
 	}
 
 	/**
+		Returns a random sign.
+	**/
+	public static inline function randsign()
+	{
+		return sign(irand(-1, 1) + 0.1);
+	}
+
+	/**
 		Wraps x between min and max. If it passes a value treshold, it will return on the other side
 	**/
 	public static inline function wrap(x:Int, min:Int, max:Int)
