@@ -118,22 +118,28 @@ class ArrayExtension
 
 	public static function pickExcept<T>(a:Array<T>, except:Array<T>, ?seed:hxd.Rand)
 	{
+		var first = 0;
 		var index = 0;
 
 		if (seed != null)
 		{
-			index = MathTools.seeded_irand(0, a.length - 1, seed);
+			index = first = MathTools.seeded_irand(0, a.length - 1, seed);
 		}
 		else
 		{
-			index = MathTools.irand(0, a.length - 1);
+			index = first = MathTools.irand(0, a.length - 1);
 		}
 
 		while (IterableExtension.has(except, a[index]))
 		{
 			index = (index + 1) % a.length;
+
+			if (index == first)
+			{
+				break;
+			}
 		}
 
-		return a[index];
+		return index == first ? null : a[index];
 	}
 }
