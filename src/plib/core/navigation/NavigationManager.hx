@@ -98,8 +98,16 @@ class NavigationManager
 
 		var linked = node.getLink(direction);
 
-		if (linked == null)
-			return false;
+		while (linked == null || linked.instance.isDisabled())
+		{
+			if (linked == null)
+				return false;
+
+			if (linked.instance.isDisabled())
+			{
+				linked = linked.getLink(direction);
+			}
+		}
 
 		changeCurrent(current, linked.instance);
 		linked.previous.set(direction, node);

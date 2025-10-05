@@ -5,6 +5,7 @@ class BasicNavigationInstance extends h2d.Object implements INavigationInstance
 	public var navigation:NavigationManager;
 
 	var interactive:h2d.Interactive;
+	var disabled:Bool;
 
 	private function new()
 	{
@@ -14,6 +15,8 @@ class BasicNavigationInstance extends h2d.Object implements INavigationInstance
 		interactive.onOver = onInteractiveOver;
 		interactive.onOut = onInteractiveOut;
 		interactive.onClick = onInteractiveClick;
+
+		disabled = false;
 	}
 
 	private function onInteractiveOver(e:hxd.Event)
@@ -53,11 +56,18 @@ class BasicNavigationInstance extends h2d.Object implements INavigationInstance
 
 	public function enableInteractive()
 	{
-		interactive.cancelEvents = false;
+		addChild(interactive);
+		disabled = false;
 	}
 
 	public function disableInteractive()
 	{
-		interactive.cancelEvents = true;
+		interactive.remove();
+		disabled = true;
+	}
+
+	public function isDisabled()
+	{
+		return disabled;
 	}
 }

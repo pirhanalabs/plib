@@ -17,6 +17,8 @@ interface INavigationInstance
 	function disableInteractive():Void;
 	function enableInteractive():Void;
 
+	function isDisabled():Bool;
+
 	// callback
 	function execute():Void;
 }
