@@ -10,9 +10,12 @@ class Screen extends UpdateTreeNode
 	var camera:plib.engine.Camera;
 	var animator:plib.common.animator.Animator;
 
+	var allowInputs:Bool;
+
 	private function new()
 	{
 		super();
+		allowInputs = true;
 	}
 
 	/**
@@ -69,6 +72,13 @@ class Screen extends UpdateTreeNode
 		Override this in subclasses to add behavior.
 	**/
 	override function dispose() {}
+
+	/**
+		This is always triggered before update, and only if
+		`allowInputs` is true.
+		Override this in subclasses if needed.
+	**/
+	private function handleInputs() {}
 
 	/** 
 		Triggers once per frame. Use this to update game data.

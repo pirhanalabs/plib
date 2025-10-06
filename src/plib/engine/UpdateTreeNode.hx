@@ -38,23 +38,49 @@ class UpdateTreeNode
 		}
 	}
 
+	/**
+		Destroys this item and flags it for garbage collection.
+	**/
 	public function destroy()
 	{
 		this.destroyed = true;
 	}
 
+	/**
+		Triggers if the screen is destroyed.
+		Use this to safely dispose of things.
+		Override this in subclasses.
+	**/
 	public function dispose() {}
 
+	/**
+		Executes once per frame.
+		Use this to update data.
+		Override this in subclasses.
+	**/
 	private function update(frame:Frame) {}
 
+	/**
+		Executes once per frame.
+		Use this to update visuals.
+		Override this in subclasses.
+	**/
 	private function postupdate() {}
 
+	/**
+		Returns true if this node can run.
+		This will affect all children as well.
+	**/
 	@:noCompletion
-	private function __canRun()
+	public function __canRun()
 	{
 		return !paused && !destroyed;
 	}
 
+	/**
+		Tries to update this node and all its children.
+		This should only ever be called on root nodes.
+	**/
 	@:noCompletion
 	public function __update(frame:Frame)
 	{
@@ -72,6 +98,10 @@ class UpdateTreeNode
 		}
 	}
 
+	/**
+		Tries to update this node and all its children.
+		This should only ever be called on root nodes.
+	**/
 	@:noCompletion
 	public function __postupdate()
 	{
