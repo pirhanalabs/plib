@@ -1,6 +1,6 @@
 package plib.engine;
 
-using plib.core.extensions.ArrayExtension;
+using plib.common.extensions.ArrayExtension;
 
 @:allow(plib.engine.Application)
 class Screen extends UpdateTreeNode
@@ -8,7 +8,7 @@ class Screen extends UpdateTreeNode
 	var app:plib.engine.Application;
 	var root:h2d.Layers;
 	var camera:plib.engine.Camera;
-	var animator:plib.core.animator.Animator;
+	var animator:plib.common.animator.Animator;
 
 	private function new()
 	{
@@ -24,7 +24,7 @@ class Screen extends UpdateTreeNode
 	{
 		this.app = app;
 		this.root = new h2d.Layers();
-		animator = new plib.core.animator.Animator(64);
+		animator = new plib.common.animator.Animator(64);
 		camera = new plib.engine.Camera(root);
 		camera.setViewport(app.vw, app.vh);
 		addChild(animator);

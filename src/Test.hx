@@ -2,10 +2,10 @@ import plib.MathTools;
 import plib.engine.Application;
 import plib.engine.Frame;
 
-using plib.core.extensions.ArrayExtension;
-using plib.core.extensions.IterableExtension;
+using plib.common.extensions.ArrayExtension;
+using plib.common.extensions.IterableExtension;
 
-class TestNavItem extends plib.core.navigation.BasicNavigationInstance
+class TestNavItem extends plib.heaps.nav.BasicNavigationInstance
 {
 	var g:h2d.Bitmap;
 	var t1 = h2d.Tile.fromColor(0xffa500, 16, 16);
@@ -45,7 +45,7 @@ class TestScreen extends plib.engine.Screen
 	var velx:Float = 1;
 	var vely:Float = 1.5;
 
-	var nav = new plib.core.navigation.NavigationManager();
+	var nav = new plib.heaps.nav.NavigationManager();
 
 	public function new()
 	{
@@ -91,7 +91,7 @@ class TestScreen extends plib.engine.Screen
 			nav.add(o);
 		}
 
-		plib.core.navigation.NavigationHelper.buildLinear(nav, Dw, options);
+		plib.heaps.nav.NavigationHelper.buildLinear(nav, Dw, options);
 
 		nav.select(options[0]);
 	}

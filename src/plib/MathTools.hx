@@ -280,4 +280,14 @@ class MathTools
 		while ((t - r) != 0);
 		return r;
 	}
+
+	/**
+		gets a subrange ratio between two values.
+
+		[val <= min] = 0 and [val >= max] = 1
+	**/
+	public static function subrng(val:Float, min:Float, max:Float)
+	{
+		return Math.min(1, Math.max(0, val - min) / (max - min));
+	}
 }
