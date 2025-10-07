@@ -16,6 +16,7 @@ class Application extends hxd.App
 	public var frame(default, null):plib.engine.Frame;
 	public var cursor(default, null):plib.engine.CustomCursor;
 	public var inputs(default, null):plib.engine.InputManager;
+	public var audio(default, null):plib.engine.AudioManager;
 
 	public var vw(default, null):Int;
 	public var vh(default, null):Int;
@@ -103,6 +104,7 @@ class Application extends hxd.App
 		this.cursor.setCursorPosition(window.mouseX, window.mouseY);
 
 		this.inputs = new plib.engine.InputManager();
+		this.audio = new plib.engine.AudioManager();
 	}
 
 	@:noCompletion
