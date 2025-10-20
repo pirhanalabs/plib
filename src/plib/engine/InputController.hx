@@ -53,11 +53,11 @@ class InputController<T:EnumValue>
 
 	/**
 		Creates a new controller access.
+		Does not add to the controller access stack. Call ca.grantAccess() for that.
 	**/
 	public function createAccess()
 	{
 		var ca = new InputControllerAccess(this);
-		stack.push(ca);
 		return ca;
 	}
 

@@ -184,10 +184,6 @@ class Application extends hxd.App
 		if (screenCount > 0)
 		{
 			final screen = screens[screenCount - 1];
-			if (screen.__canRun() && screen.allowInputs)
-			{
-				screen.handleInputs();
-			}
 			screen.__update(frame);
 		}
 	}

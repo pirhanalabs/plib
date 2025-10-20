@@ -137,7 +137,7 @@ class TestScreen extends plib.engine.Screen
 		nav.select(options[0]);
 	}
 
-	override function handleInputs()
+	function handleInputs()
 	{
 		if (ca.pressed(Interact))
 		{
@@ -169,6 +169,8 @@ class TestScreen extends plib.engine.Screen
 	override function update(frame:Frame)
 	{
 		super.update(frame);
+
+		handleInputs();
 
 		obj.x += velx * frame.tmod;
 		obj.y += vely * frame.tmod;
