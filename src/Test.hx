@@ -5,6 +5,43 @@ import plib.engine.Frame;
 using plib.common.extensions.ArrayExtension;
 using plib.common.extensions.IterableExtension;
 
+enum InputID
+{
+	Interact;
+	Cancel;
+	Settings;
+	Start;
+	MoveUp;
+	MoveDw;
+	MoveRt;
+	MoveLt;
+}
+
+class Inputs
+{
+	public static var controller:plib.engine.InputController<InputID>;
+
+	public static function Init()
+	{
+		controller = new plib.engine.InputController(plib.engine.Application.get().inputs);
+		controller.registerInput(Interact, A, hxd.Key.SPACE, null);
+		controller.registerInput(Cancel, B, hxd.Key.ESCAPE, null);
+		controller.registerInput(Settings, SELECT, hxd.Key.ESCAPE, null);
+		controller.registerInput(Start, START, hxd.Key.SHIFT, null);
+		controller.registerInput(MoveUp, DPAD_UP, hxd.Key.W, plib.Direction.N);
+		controller.registerInput(MoveLt, DPAD_LEFT, hxd.Key.A, plib.Direction.W);
+		controller.registerInput(MoveDw, DPAD_DOWN, hxd.Key.S, plib.Direction.S);
+		controller.registerInput(MoveRt, DPAD_RIGHT, hxd.Key.D, plib.Direction.E);
+	}
+
+	public static function getString(id:InputID)
+	{
+		return controller.get(id).getName();
+	}
+}
+
+typedef ControllerAccess = plib.engine.InputControllerAccess<InputID>;
+
 class TestNavItem extends plib.heaps.nav.BasicNavigationInstance
 {
 	var g:h2d.Bitmap;
@@ -46,6 +83,7 @@ class TestScreen extends plib.engine.Screen
 	var vely:Float = 1.5;
 
 	var nav = new plib.heaps.nav.NavigationManager();
+	var ca:ControllerAccess;
 
 	public function new()
 	{
@@ -77,6 +115,9 @@ class TestScreen extends plib.engine.Screen
 	{
 		super.ready();
 
+		ca = Inputs.controller.createAccess();
+		ca.grantAccess();
+
 		obj = new h2d.Bitmap(h2d.Tile.fromColor(0xffa500, 16, 16));
 		root.add(obj, 1);
 
@@ -96,29 +137,29 @@ class TestScreen extends plib.engine.Screen
 		nav.select(options[0]);
 	}
 
-	private function handleInputs()
+	override function handleInputs()
 	{
-		if (hxd.Key.isPressed(hxd.Key.SPACE))
+		if (ca.pressed(Interact))
 		{
 			camera.bump(0, -10);
 			camera.shake(0.1, 2);
 		}
 
 		// navigation
-		if (hxd.Key.isPressed(hxd.Key.A))
+		if (ca.pressed(MoveLt))
 		{
 			nav.tryMove(Lt);
 		}
-		else if (hxd.Key.isPressed(hxd.Key.D))
+		else if (ca.pressed(MoveRt))
 		{
 			nav.tryMove(Rt);
 		}
-		else if (hxd.Key.isPressed(hxd.Key.S))
+		else if (ca.pressed(MoveDw))
 		{
 			nav.tryMove(Dw);
 			trace('working?');
 		}
-		else if (hxd.Key.isPressed(hxd.Key.W))
+		else if (ca.pressed(MoveUp))
 		{
 			nav.tryMove(Up);
 			trace('working?');
@@ -128,8 +169,6 @@ class TestScreen extends plib.engine.Screen
 	override function update(frame:Frame)
 	{
 		super.update(frame);
-
-		handleInputs();
 
 		obj.x += velx * frame.tmod;
 		obj.y += vely * frame.tmod;
@@ -182,6 +221,7 @@ class Test extends Application
 	{
 		super.ready();
 		engine.backgroundColor = 0xff0000;
+		Inputs.Init();
 		pushScreen(new TestScreen());
 	}
 }
