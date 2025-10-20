@@ -38,6 +38,12 @@ class NavigationManager
 		var node = new NavigationNode(instance);
 		instance.navigation = this;
 		instances.set(instance, node);
+
+		if (interactionsDisabled)
+		{
+			node.instance.disableInteractive();
+		}
+		
 		return node;
 	}
 
