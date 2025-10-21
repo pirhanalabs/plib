@@ -56,13 +56,13 @@ class BasicNavigationInstance extends h2d.Object implements INavigationInstance
 
 	public function enableInteractive()
 	{
-		interactive.cancelEvents = true;
+		interactive.cancelEvents = false;
 		disabled = false;
 	}
 
 	public function disableInteractive()
 	{
-		interactive.cancelEvents = false;
+		interactive.cancelEvents = true;
 		disabled = true;
 	}
 
