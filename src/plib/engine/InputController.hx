@@ -6,6 +6,8 @@ class InputController<T:EnumValue>
 	private final inputs:Map<T, plib.engine.InputBinding>;
 	private final manager:plib.engine.InputManager;
 
+	private var enabled:Bool;
+
 	private var priorityLevel:Int;
 
 	/**
@@ -17,11 +19,27 @@ class InputController<T:EnumValue>
 		inputs = [];
 		this.manager = manager;
 		this.stack = [];
+		enabled = true;
+	}
+
+	public function enable()
+	{
+		enabled = true;
+	}
+
+	public function disable()
+	{
+		enabled = false;
+	}
+
+	public inline function isEnabled()
+	{
+		return enabled;
 	}
 
 	public function canReadInputs(access:InputControllerAccess<T>)
 	{
-		return stack[stack.length - 1] == access;
+		return enabled && stack[stack.length - 1] == access;
 	}
 
 	public function removeAccess(access:InputControllerAccess<T>)
