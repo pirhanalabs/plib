@@ -301,6 +301,20 @@ class Application extends hxd.App
 		#end
 	}
 
+	public function setScreen(screen:Screen):Void
+	{
+		while (screenCount > 0)
+		{
+			// we dont use popScreen to avoid focusing the next screen.
+			var current = screens[screens.length - 1];
+			current.root.remove();
+			current.dispose();
+			screens.pop();
+			screenCount--;
+		}
+		pushScreen(screen);
+	}
+
 	public function pushScreen(screen:Screen):Void
 	{
 		if (screenCount > 0)
