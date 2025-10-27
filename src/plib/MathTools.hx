@@ -290,4 +290,22 @@ class MathTools
 	{
 		return Math.min(1, Math.max(0, val - min) / (max - min));
 	}
+
+	public static function ioscillate(val:Int, min:Int, max:Int):Int
+	{
+		return Std.int(oscillate(val, min, max));
+	}
+
+	public static function oscillate(val:Float, min:Float, max:Float)
+	{
+		var range = max - min;
+		var t = (val - min) % (range * 2);
+
+		if (t < 0)
+		{
+			t += range * 2;
+		}
+
+		return min + range - Math.abs(range - t);
+	}
 }
