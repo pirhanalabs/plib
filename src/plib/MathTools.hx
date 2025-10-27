@@ -291,11 +291,21 @@ class MathTools
 		return Math.min(1, Math.max(0, val - min) / (max - min));
 	}
 
+	/**
+		Oscillates an integer value
+		Like warp(val, min, max), except instead of warping the value, it
+		will pingpong.
+	**/
 	public static function ioscillate(val:Int, min:Int, max:Int):Int
 	{
 		return Std.int(oscillate(val, min, max));
 	}
 
+	/**
+		Oscillates a float value
+		Like warp(val, min, max), except instead of warping the value, it
+		will pingpong.
+	**/
 	public static function oscillate(val:Float, min:Float, max:Float)
 	{
 		var range = max - min;
@@ -306,6 +316,6 @@ class MathTools
 			t += range * 2;
 		}
 
-		return min + range - Math.abs(range - t);
+		return min + range - fabs(range - t);
 	}
 }
