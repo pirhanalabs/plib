@@ -23,9 +23,23 @@ class Queue<T>
 		count = 0;
 	}
 
-	public function peek()
+	public inline function peek()
 	{
+		if (isEmpty())
+			return null;
 		return vector.get(front);
+	}
+
+	public function unshift(item:T)
+	{
+		if (isFull())
+		{
+			throw "Queue is full";
+		}
+
+		front = (front - 1 + vector.length) % vector.length;
+		vector.set(front, item);
+		count++;
 	}
 
 	public function enqueue(item:T)
@@ -49,27 +63,27 @@ class Queue<T>
 		return r;
 	}
 
-	public function size()
+	public inline function size()
 	{
 		return vector.length;
 	}
 
-	public function any()
+	public inline function any()
 	{
 		return count > 0;
 	}
 
-	public function isFull()
+	public inline function isFull()
 	{
 		return count == vector.length;
 	}
 
-	public function getCount()
+	public inline function getCount()
 	{
 		return count;
 	}
 
-	public function isEmpty()
+	public inline function isEmpty()
 	{
 		return count == 0;
 	}
