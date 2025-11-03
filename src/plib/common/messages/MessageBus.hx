@@ -21,7 +21,7 @@ class MessageBus
 		return instance;
 	}
 
-	private var listeners:Map<Class<IMessage>, Array<IMessage->Void>>;
+	private var listeners:Map<MessageID, Array<Dynamic>>;
 
 	/**
 		Simple Message Dispatcher
@@ -34,7 +34,7 @@ class MessageBus
 	/**
 		Add a message listener
 	**/
-	public function on<T:IMessage>(c:Class<T>, fn:T->Void)
+	public function on(id:MessageID, fn:T->Void)
 	{
 		if (!listeners.exists(c))
 		{
@@ -47,7 +47,7 @@ class MessageBus
 	/**
 		Remove a message listener
 	**/
-	public function remove<T:IMessage>(c:Class<T>, fn:T->Void)
+	public function remove(id:MessageID, fn:T->Void)
 	{
 		if (!listeners.exists(c))
 			return false;
@@ -68,8 +68,7 @@ class MessageBus
 	**/
 	public function emit<T:IMessage>(data:T)
 	{
-		var c = Type.getClass(data);
-		for (fn in (listeners.get(c) ?? []))
+		for (fn in (listeners.get(data.getID()) ?? []))
 		{
 			cast(fn : T->Void)(data);
 		}

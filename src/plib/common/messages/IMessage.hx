@@ -1,3 +1,6 @@
 package plib.common.messages;
 
-interface IMessage {}
+interface IMessage
+{
+	function getID():MessageID;
+}
