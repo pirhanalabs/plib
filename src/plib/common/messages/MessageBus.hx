@@ -34,25 +34,25 @@ class MessageBus
 	/**
 		Add a message listener
 	**/
-	public function on(id:MessageID, fn:T->Void)
+	public function on<T:IMessage>(id:MessageID, fn:T->Void)
 	{
-		if (!listeners.exists(c))
+		if (!listeners.exists(id))
 		{
-			listeners.set(c, [fn]);
+			listeners.set(id, [fn]);
 			return;
 		}
-		listeners.get(c).push(fn);
+		listeners.get(id).push(fn);
 	}
 
 	/**
 		Remove a message listener
 	**/
-	public function remove(id:MessageID, fn:T->Void)
+	public function remove<T:IMessage>(id:MessageID, fn:T->Void)
 	{
-		if (!listeners.exists(c))
+		if (!listeners.exists(id))
 			return false;
 
-		return listeners.get(c).remove(fn);
+		return listeners.get(id).remove(fn);
 	}
 
 	/**
@@ -60,7 +60,7 @@ class MessageBus
 	**/
 	public function clear()
 	{
-		instance = [];
+		this.listeners = [];
 	}
 
 	/**
