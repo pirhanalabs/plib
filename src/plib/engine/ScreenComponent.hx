@@ -21,6 +21,10 @@ class ScreenComponent extends plib.engine.Screen
 	public function new(screen:plib.engine.Screen)
 	{
 		super();
+
+		if (screen == null)
+			throw 'screen parent cannot be null for ScreenComponent';
+
 		this.screen = screen;
 		screen.addChild(this);
 
