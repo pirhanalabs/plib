@@ -14,7 +14,7 @@ class Random
 
 	/**
 		Creates a new pseudo-random number generator.
-		
+
 		This is designed to work similarly to how old
 		console games such as the Gameboy handled pseudo-random
 		number generators, with a bunch of helper functionality.
@@ -113,5 +113,21 @@ class Random
 	public function pick<T>(a:Array<T>):T
 	{
 		return a[irange(0, a.length - 1)];
+	}
+
+	/**
+		Shuffles an array.
+	**/
+	public function shuffle<T>(a:Array<T>)
+	{
+		var n = a.length;
+
+		for (i in 0...n)
+		{
+			final j = i + irange(0, n - i - 1);
+			final temp = a[i];
+			a[i] = a[j];
+			a[j] = temp;
+		}
 	}
 }
