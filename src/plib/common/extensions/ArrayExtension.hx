@@ -115,4 +115,9 @@ class ArrayExtension
 			return MathTools.pick(a);
 		}
 	}
+
+	public static inline function last<T>(a:Array<T>):T
+	{
+		return a[a.length - 1];
+	}
 }
