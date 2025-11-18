@@ -3,6 +3,14 @@ package plib.common.extensions;
 class IterableExtension
 {
 	/**
+		Calls fn on all elements of the iterable.
+	**/
+	public static inline function each<T>(i:Iterable<T>, fn:T->Void)
+	{
+		Lambda.iter(i, fn);
+	}
+
+	/**
 		Returns true if exactly `count` elements match requirement `fn`.
 	**/
 	public static inline function exact<T>(i:Iterable<T>, count:Int, fn:T->Bool):Bool
