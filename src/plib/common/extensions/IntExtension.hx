@@ -24,4 +24,12 @@ class IntExtension
 			return me + Std.int(range * ((min - me) / range + 1)) - 1;
 		return min + (me - min) % range;
 	}
+
+	/**
+		Returns if the number is between min and max, inclusive.
+	**/
+	public static inline function isBetween(me:Int, min:Int, max:Int):Bool
+	{
+		return me >= min && me <= max;
+	}
 }

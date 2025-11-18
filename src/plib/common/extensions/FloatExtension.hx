@@ -29,4 +29,12 @@ class FloatExtension
 	{
 		return me < min ? min : me > max ? max : me;
 	}
+
+	/**
+		Returns if the number is between min and max, inclusive.
+	**/
+	public static inline function isBetween(me:Float, min:Float, max:Float):Bool
+	{
+		return me >= min && me <= max;
+	}
 }
