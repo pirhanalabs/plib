@@ -120,4 +120,15 @@ class ArrayExtension
 	{
 		return a[a.length - 1];
 	}
+
+	/**
+		Sets all index values to `value`.
+	**/
+	public static inline function fill<T>(a:Array<T>, value:T)
+	{
+		for (i in 0...a.length)
+		{
+			a[i] = value;
+		}
+	}
 }
