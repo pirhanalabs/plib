@@ -109,6 +109,10 @@ class TestScreen extends plib.engine.Screen
 		trace('max value test: ' + [1, 2, 3, 4].getMaxValue(m -> m));
 		trace('min element test: ' + [1, 2, 3, 4].getMinElement(m -> m));
 		trace('min value test: ' + [1, 2, 3, 4].getMinValue(m -> m));
+
+		trace('overload 1:', [1, 2, 3, 4].totalize());
+		trace('overload 2:', [1, 2, 3, 4].totalize((r) -> r / 2));
+
 	}
 
 	override function ready()

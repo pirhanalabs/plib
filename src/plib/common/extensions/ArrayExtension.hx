@@ -13,7 +13,7 @@ class ArrayExtension
 	/**
 		A dumber, more streamlined version of reduce, only for calculating total of values.
 	**/
-	public inline static function totalize<T:Float>(a:Array<T>):T
+	extern overload public inline static function totalize<T:Float>(a:Array<T>):T
 	{
 		return reduce(a, (acc, n) -> acc + n, cast 0);
 	}
@@ -132,9 +132,9 @@ class ArrayExtension
 		}
 	}
 
-	public static inline function totalize(a:Array<T>, fn:T->Float):Float
+	extern overload public static inline function totalize<T>(a:Array<T>, fn:T->Float):Float
 	{
-		var value = 0;
+		var value = 0.0;
 		each(a, e -> value += fn(e));
 		return value;
 	}

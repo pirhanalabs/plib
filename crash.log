@@ -1,0 +1,30 @@
+Null access .funs
+Exception:
+
+Callstack:
+
+Called from plib.engine.Application.onCrash (plib/engine/Application.hx line 263)
+Called from hxsl.Eval.eval (hxsl/Eval.hx line 108)
+Called from hxsl.SharedShader.makeInstance (hxsl/SharedShader.hx line 85)
+Called from hxsl.Shader.updateConstantsFinal (hxsl/Shader.hx line 105)
+Called from h3d.shader.Base2d.updateConstants (hxsl/Macros.hx line 274)
+Called from h3d.pass.OutputShader.compileShaders (h3d/pass/OutputShader.hx line 21)
+Called from h2d.RenderContext.initShaders (h2d/RenderContext.hx line 213)
+Called from h2d.RenderContext.begin (h2d/RenderContext.hx line 189)
+Called from h2d.Scene.render (h2d/Scene.hx line 787)
+Called from hxd.App.render (hxd/App.hx line 129)
+Called from h3d.Engine.render (h3d/Engine.hx line 406)
+Called from hxd.App.mainLoop (hxd/App.hx line 198)
+Called from hxd.App.~setup.2 (hxd/App.hx line 150)
+Called from hxd.App.loadAssets (hxd/App.hx line 176)
+Called from hxd.App.setup (hxd/App.hx line 146)
+Called from h3d.Engine.onCreate (h3d/Engine.hx line 242)
+Called from h3d.impl.GlDriver.~init.0 (h3d/impl/GlDriver.hx line 1677)
+Called from haxe.$Timer.~delay.0 (/usr/local/lib/haxe/std/haxe/Timer.hx line 149)
+Called from haxe.$Timer.~__constructor__.0 (/usr/local/lib/haxe/std/haxe/Timer.hx line 81)
+Called from sys.thread.EventLoop.progress (/usr/local/lib/haxe/std/sys/thread/EventLoop.hx line 146)
+Called from hxd.$System.runMainLoop (hxd/System.hl.hx line 153)
+Called from haxe.$Timer.~delay.0 (/usr/local/lib/haxe/std/haxe/Timer.hx line 149)
+Called from haxe.$Timer.~__constructor__.0 (/usr/local/lib/haxe/std/haxe/Timer.hx line 81)
+Called from sys.thread.EventLoop.loop (/usr/local/lib/haxe/std/sys/thread/EventLoop.hx line 183)
+Called from sys.thread._Thread.$Thread_Impl_.processEvents (/usr/local/lib/haxe/std/hl/_std/sys/thread/Thread.hx line 83)
