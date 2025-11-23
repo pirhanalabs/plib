@@ -131,4 +131,11 @@ class ArrayExtension
 			a[i] = value;
 		}
 	}
+
+	public static inline function totalize(a:Array<T>, fn:T->Float):Float
+	{
+		var value = 0;
+		each(a, e -> value += fn(e));
+		return value;
+	}
 }
