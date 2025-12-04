@@ -162,6 +162,7 @@ class Application extends hxd.App
 		super.update(dt);
 		_update(dt);
 		_postupdate();
+		_gc();
 	}
 
 	override function onResize()
@@ -226,6 +227,12 @@ class Application extends hxd.App
 				screens[screenCount - 1].resize();
 			}
 		}
+	}
+
+	private function _gc()
+	{
+		if (screenCount > 0)
+			screens[screenCount - 1].__gc();
 	}
 
 	@:noCompletion
@@ -308,7 +315,7 @@ class Application extends hxd.App
 			// we dont use popScreen to avoid focusing the next screen.
 			var current = screens[screens.length - 1];
 			current.root.remove();
-			current.dispose();
+			current.destroy();
 			screens.pop();
 			screenCount--;
 		}
@@ -336,7 +343,7 @@ class Application extends hxd.App
 
 		var screen = screens.pop();
 		screen.root.remove();
-		screen.dispose();
+		screen.destroy();
 		screenCount--;
 
 		if (screenCount > 0)
