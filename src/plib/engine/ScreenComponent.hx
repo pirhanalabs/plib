@@ -40,5 +40,10 @@ class ScreenComponent extends plib.engine.Screen
 	{
 		super.dispose();
 		this.root.remove();
+
+		if (this.parent != null)
+		{
+			this.parent.removeChild(this);
+		}
 	}
 }
