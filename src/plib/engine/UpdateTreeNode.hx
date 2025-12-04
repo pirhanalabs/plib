@@ -139,5 +139,12 @@ class UpdateTreeNode
 			this.parent = null;
 			this.children = [];
 		}
+		else
+		{
+			for (child in children)
+			{
+				child.__gc();
+			}
+		}
 	}
 }
