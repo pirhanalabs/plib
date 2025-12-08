@@ -33,7 +33,6 @@ class ScreenComponent extends plib.engine.Screen
 		this.root = new h2d.Layers();
 		animator = new plib.common.animator.Animator(64);
 		camera = screen.camera;
-		ready();
 	}
 
 	override function dispose()

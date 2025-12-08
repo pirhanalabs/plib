@@ -31,6 +31,12 @@ class Screen extends UpdateTreeNode
 		addChild(camera);
 	}
 
+	private function addComponent(component:ScreenComponent)
+	{
+		addChild(component);
+		component.ready();
+	}
+
 	/**
 		Called when the screen is added to the screen stack.
 		Override this in subclasses to add behavior.
