@@ -95,6 +95,27 @@ class Random
 	}
 
 	/**
+		Returns the key of a map of weighted elements.
+	**/
+	public function weightMap<T>(weightmap:Map<T, Float>):Null<T>
+	{
+		var t = 0.0;
+
+		for (k => w in weightmap)
+			t += w;
+
+		var r = range(0, t);
+		for (k => w in weightmap)
+		{
+			if (t < w)
+				return k;
+			r -= w;
+		}
+
+		return null;
+	}
+
+	/**
 		Returns a random value of a number of rolls from a dice.
 	**/
 	public function ndice(n:Int, sides:Int):Int
