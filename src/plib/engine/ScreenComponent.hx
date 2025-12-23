@@ -18,10 +18,13 @@ class ScreenComponent extends plib.engine.Screen
 		automatically called. They serve no purpose, unless
 		manually triggered.
 	**/
-	public function new(screen:plib.engine.Screen)
+	public function new()
 	{
 		super();
+	}
 
+	private function _initComponent(screen:plib.engine.Screen, layer:Int = 1)
+	{
 		if (screen == null)
 			throw 'screen parent cannot be null for ScreenComponent';
 
@@ -34,6 +37,7 @@ class ScreenComponent extends plib.engine.Screen
 		animator = new plib.common.animator.Animator(64);
 		camera = screen.camera;
 
+		screen.root.add(this.root, layer);
 		addChild(animator);
 	}
 

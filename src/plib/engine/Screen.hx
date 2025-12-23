@@ -31,10 +31,24 @@ class Screen extends UpdateTreeNode
 		addChild(camera);
 	}
 
-	private function addComponent(component:ScreenComponent)
+	/**
+		Add a component to this screen. Components are added by default to the
+		root, at `layer` layer.
+	**/
+	private function addComponent(component:ScreenComponent, layer:Int = 1)
 	{
 		addChild(component);
+		@:privateAccess component._initComponent(this, layer);
 		component.ready();
+	}
+
+	/**
+		Remove a component from this screen. This is the same as doing
+		component.destroy().
+	**/
+	private function removeComponent(component:ScreenComponent)
+	{
+		component.destroy();
 	}
 
 	/**
