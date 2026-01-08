@@ -14,6 +14,11 @@ abstract MapList<T, K>(Map<T, Array<K>>)
 		return this.get(key).push(value);
 	}
 
+	public inline function get(key:T)
+	{
+		return this.get(key);
+	}
+
 	public inline function remove(key:T, value:K)
 	{
 		return hasKey(key) && this.get(key).remove(value);
