@@ -1,6 +1,6 @@
 package plib.common.structs;
 
-abstract MapList<T, K>(Map<T, Array<K>>)
+abstract MapList<T, K>(Map<T, Array<K>>) to Map<T, Array<K>>
 {
 	public inline function new()
 	{
