@@ -113,6 +113,15 @@ class TestScreen extends plib.engine.Screen
 		trace('overload 1:', [1, 2, 3, 4].totalize());
 		trace('overload 2:', [1, 2, 3, 4].totalize((r) -> r / 2));
 
+		trace('M.max', plib.M.max(0, 1, 2, 3, 4, 5));
+		trace('M.min', plib.M.min(0, 1, 2, 3, 4, 5));
+
+		var v2 = new plib.common.structs.Vec2(0, 0);
+		var v2b = new plib.common.structs.Vec2(100, 0);
+		var v2v = new plib.common.structs.Vec2(0, 0);
+		trace('Vec2', v2);
+		v2.smoothdamp(v2b, v2v, 0.2, 1);
+		trace('Vec2 smoothdamp', v2);
 	}
 
 	override function ready()

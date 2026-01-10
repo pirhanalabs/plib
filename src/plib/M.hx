@@ -8,8 +8,28 @@ class M
 	inline public static final PI_HALF = 1.5707963267948966;
 	inline public static final PI = 3.141592653589793;
 	inline public static final PI2 = 6.283185307179586;
+	inline public static final ANGLE_360 = PI2;
+	inline public static final ANGLE_180 = PI;
+	inline public static final ANGLE_90 = PI_HALF;
+	inline public static final ANGLE_45 = 0.785398163397448;
+	inline public static final SQRT2 = 1.414213562373095;
 
+	inline public static final RAD_TO_DEG = 180 / PI;
+	inline public static final DEG_TO_RAD = PI / 180;
+
+	inline public static final UINT8_MAX = 0xFF;
+	inline public static final INT8_MAX = 0x7F;
+	inline public static final INT8_MIN = -0x80;
+	inline public static final UNIT16_MAX = 0xFFFF;
+	inline public static final INT16_MAX = 0x7FFF;
+	inline public static final INT16_MIN = -0x8000;
+	inline public static final UINT32_MAX = 0xFFFFFFFF;
+	inline public static final INT32_MAX = 0x7FFFFFFF;
+	inline public static final INT32_MIN = -0x80000000;
 	inline public static final FLOAT_MAX = 3.4028234663852886e+38;
+	inline public static final FLOAT_MIN = -3.4028234663852886e+38;
+	inline public static final DOUBLE_MAX = 1.7976931348623157e+308;
+	inline public static final DOUBLE_MIN = -1.7976931348623157e+308;
 
 	/**
 		Returns Nan value.
@@ -33,6 +53,22 @@ class M
 	public static inline function NEGATIVE_INFINITY()
 	{
 		return Math.NEGATIVE_INFINITY;
+	}
+
+	/**
+		Converts degrees to radians.
+	**/
+	public static inline function toRadian(deg:Float)
+	{
+		return deg * MathTools.DEG_TO_RAD;
+	}
+
+	/**
+		Converts radians to degrees.
+	**/
+	public static inline function toDegree(rad:Float)
+	{
+		return rad * MathTools.RAD_TO_DEG;
 	}
 
 	/**
