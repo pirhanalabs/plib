@@ -116,6 +116,15 @@ class TestScreen extends plib.engine.Screen
 		trace('M.max', plib.M.max(0, 1, 2, 3, 4, 5));
 		trace('M.min', plib.M.min(0, 1, 2, 3, 4, 5));
 
+		trace('Profile test: ', plib.Profiler.run(this, function()
+		{
+			var c = 0;
+			for (i in 0...1000000)
+			{
+				c++;
+			}
+		}));
+
 		var v2 = new plib.common.structs.Vec2(0, 0);
 		var v2b = new plib.common.structs.Vec2(100, 0);
 		var v2v = new plib.common.structs.Vec2(0, 0);
