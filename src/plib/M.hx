@@ -400,7 +400,7 @@ class M
 	public static inline function pretty(x:Float, precision:Int = 0):Float
 	{
 		if (precision == 0)
-			return Math.round(x);
+			return round(x);
 		var d = Math.pow(10, precision);
 		return round(x * d) / d;
 	}
