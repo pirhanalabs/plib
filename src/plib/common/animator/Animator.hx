@@ -2,9 +2,9 @@ package plib.common.animator;
 
 class Animator extends plib.engine.UpdateTreeNode
 {
-	var queue:plib.common.structs.Queue<AnimatorNode>;
-	var queueCur:Null<AnimatorNode>;
-	var unqueued:Array<AnimatorNode>;
+	var queue:plib.common.structs.Queue<PriorityNode>;
+	var queueCur:Null<PriorityNode>;
+	var unqueued:Array<PriorityNode>;
 	var unqueuedCount:Int;
 
 	var queuedPaused:Bool;
@@ -30,19 +30,34 @@ class Animator extends plib.engine.UpdateTreeNode
 		return (queue.any() || unqueuedCount > 0) && !queuedPaused && !unqueuedPaused;
 	}
 
-	public function create()
+	public function create(id:String = '')
 	{
-		var node = new PriorityNode();
+		var node = new PriorityNode(id);
 		unqueued.push(node);
 		unqueuedCount++;
 		return node;
 	}
 
-	public function createQueued()
+	public function createQueued(id:String = '')
 	{
-		var node = new PriorityNode();
+		var node = new PriorityNode(id);
 		queue.enqueue(node);
 		return node;
+	}
+
+	/**
+		Cancel an unqueued animation.
+	**/
+	public function cancel(id:String)
+	{
+		for (anim in unqueued)
+		{
+			if (anim.id == id)
+			{
+				unqueued.remove(anim);
+				break;
+			}
+		}
 	}
 
 	public function pauseAll(paused:Bool)

@@ -2,9 +2,12 @@ package plib.common.animator;
 
 class PriorityNode extends FactoryNode
 {
-	public function new()
+	public final id:String;
+
+	public function new(id:String)
 	{
 		super();
+		this.id = id;
 	}
 
 	override function addChild(c:AnimatorNode)
