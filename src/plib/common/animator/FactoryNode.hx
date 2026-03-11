@@ -4,12 +4,18 @@ class FactoryNode extends AnimatorNode
 {
 	var cb:Void->Void;
 
+	/**
+		Sets the callback function that triggers when the factory node is completed.
+	**/
 	public function done(cb:Void->Void)
 	{
 		this.cb = cb;
 		return this;
 	}
 
+	/**
+		Simple animation node.
+	**/
 	public function anim<T>(stime:Float, o:T, fn:Float->T->Void)
 	{
 		var a = new AnimationNode<T>(stime, o, fn);
@@ -17,6 +23,9 @@ class FactoryNode extends AnimatorNode
 		return a;
 	}
 
+	/**
+		Creates a new queue.
+	**/
 	public function queue()
 	{
 		var q = new QueueNode();
@@ -24,6 +33,9 @@ class FactoryNode extends AnimatorNode
 		return q;
 	}
 
+	/**
+		Creates a new group.
+	**/
 	public function group()
 	{
 		var g = new GroupNode();
@@ -31,13 +43,31 @@ class FactoryNode extends AnimatorNode
 		return g;
 	}
 
+	/**
+		Creates a callback function that triggers once this
+		node is reached. This is mostly useful with queues or
+		to delay execution.
+	**/
+	public function fn(fn:Void->Void)
+	{
+		var f = new CallbackNode(fn);
+		addChild(f);
+		return this;
+	}
+
+	/**
+		Wait a certain amount of time.
+	**/
 	public function wait(stime:Float)
 	{
 		var w = new WaitNode(stime);
 		addChild(w);
-		return w;
+		return this;
 	}
 
+	/**
+		Progresses when the callback returns true.
+	**/
 	public function waitComplete(fn:Void->Bool)
 	{
 		var c = new WaitCompleteNode(fn);
@@ -45,6 +75,9 @@ class FactoryNode extends AnimatorNode
 		return c;
 	}
 
+	/**
+		Adds a custom node to the factory.
+	**/
 	public function add(node:AnimatorNode)
 	{
 		addChild(node);
