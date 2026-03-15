@@ -430,6 +430,22 @@ class M
 	}
 
 	/**
+		Random number variance on val. Can set different up and down normalized variance.
+	**/
+	public static inline function variance(val:Float, dw:Float, up:Float):Float
+	{
+		return rand(val - val * dw, val + val * up);
+	}
+
+	/**
+		Random number variance on val. Can set different up and down normalized variance.
+	**/
+	public static inline function ivariance(val:Int, dw:Float, up:Float):Int
+	{
+		return Math.floor(variance(val, dw, up));
+	}
+
+	/**
 		Returns the distance between two points
 	**/
 	public static inline function distance(x1:Float, y1:Float, x2:Float, y2:Float)
