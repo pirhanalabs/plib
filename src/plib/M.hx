@@ -438,6 +438,25 @@ class M
 	}
 
 	/**
+		Returns a random index from a list of float weights.
+	**/
+	public static inline function weightIndex(elements:Array<Float>)
+	{
+		var total = 0.0;
+		for (val in elements)
+			total += val;
+
+		total = M.rand(0, total);
+		for (i in 0...elements.length)
+		{
+			if (total < elements[i])
+				return i;
+			total -= elements[i];
+		}
+		return -1;
+	}
+
+	/**
 		Random number variance on val. Can set different up and down normalized variance.
 	**/
 	public static inline function ivariance(val:Int, dw:Float, up:Float):Int
