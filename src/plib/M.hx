@@ -434,7 +434,7 @@ class M
 	**/
 	public static inline function variance(val:Float, dw:Float, up:Float):Float
 	{
-		return rand(val - val * dw, val + val * up);
+		return rand(val * dw, val * up);
 	}
 
 	/**
