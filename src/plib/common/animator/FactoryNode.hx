@@ -80,6 +80,9 @@ class FactoryNode extends AnimatorNode
 	**/
 	public function add(node:AnimatorNode)
 	{
+		if (node == null)
+			return null;
+
 		addChild(node);
 		return node;
 	}
