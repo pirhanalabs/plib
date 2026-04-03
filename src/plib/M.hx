@@ -315,7 +315,7 @@ class M
 	**/
 	public static inline function fround(v:Float):Float
 	{
-		return fabs(v % 1) < 0.5 ? ffloor(v) : fround(v);
+		return fabs(v % 1) < 0.5 ? ffloor(v) : fceil(v);
 	}
 
 	/**
