@@ -17,8 +17,13 @@ class CustomCursor
 	@:allow(plib.engine.Application)
 	private var cursor:h2d.Object;
 
+	private var cursorTemplates:Map<hxd.Cursor, h2d.Object>;
+
+	public var visible(default, set):Bool = true;
+
 	public function new()
 	{
+		cursorTemplates = [];
 		cursor = new h2d.Object();
 		enabled = true;
 		this.x = 0;
@@ -29,9 +34,22 @@ class CustomCursor
 		this.delta_y = 0;
 	}
 
+	private inline function set_visible(val:Bool)
+	{
+		visible = val;
+		cursor.visible = val;
+		hxd.System.setCursor(Default);
+		return val;
+	}
+
 	public function getCursor()
 	{
 		return cursor;
+	}
+
+	public function setCursorTemplate(c:hxd.Cursor, o:h2d.Object)
+	{
+		cursorTemplates.set(c, o);
 	}
 
 	public function setCursor(o:h2d.Object)
@@ -51,9 +69,14 @@ class CustomCursor
 			// should probably do some validation work here.
 			hxd.System.setCursor = function(c:hxd.Cursor)
 			{
+				if (cursorTemplates.exists(c))
+				{
+					var template = cursorTemplates.get(c);
+					setCursor(template);
+				}
 				hxd.System.setNativeCursor(Hide);
 			}
-			hxd.System.setCursor(Hide);
+			hxd.System.setCursor(Default);
 			#end
 		}
 		else
@@ -62,7 +85,14 @@ class CustomCursor
 			// should probably do some validation work here.
 			hxd.System.setCursor = function(c:hxd.Cursor)
 			{
-				hxd.System.setNativeCursor(c);
+				if (visible)
+				{
+					hxd.System.setNativeCursor(c);
+				}
+				else
+				{
+					hxd.System.setNativeCursor(Hide);
+				}
 			}
 			hxd.System.setCursor(Default);
 			#end
