@@ -138,4 +138,18 @@ class ArrayExtension
 		each(a, e -> value += fn(e));
 		return value;
 	}
+
+	/**
+		Shuffle in an unseeded manner.
+	**/
+	public static inline function shuffle<T>(a:Array<T>)
+	{
+		for (i in 0...a.length)
+		{
+			final j = i + Std.random(a.length - i);
+			final t = a[i];
+			a[i] = a[j];
+			a[j] = t;
+		}
+	}
 }
