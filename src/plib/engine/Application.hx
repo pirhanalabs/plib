@@ -314,7 +314,7 @@ class Application extends hxd.App
 		{
 			// we dont use popScreen to avoid focusing the next screen.
 			var current = screens[screens.length - 1];
-			current.root.remove();
+			current.camera.ob1.remove();
 			current.destroy();
 			screens.pop();
 			screenCount--;
@@ -342,7 +342,7 @@ class Application extends hxd.App
 			return null;
 
 		var screen = screens.pop();
-		screen.root.remove();
+		screen.camera.ob1.remove();
 		screen.destroy();
 		screenCount--;
 
