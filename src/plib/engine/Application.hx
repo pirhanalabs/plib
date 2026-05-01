@@ -39,6 +39,7 @@ class Application extends hxd.App
 	private var screenLayer:h2d.Object;
 	private var uiLayer:h2d.Object;
 	private var overlayLayer:h2d.Layers;
+	private var topLayer:h2d.Object;
 	private var screenShaderLayer:h2d.Object; // between screen/overlay/background and overlay layer
 
 	// screen management
@@ -114,6 +115,7 @@ class Application extends hxd.App
 		backgroundLayer = new h2d.Object(screenShaderLayer);
 		screenLayer = new h2d.Object(screenShaderLayer);
 		uiLayer = new h2d.Object(screenShaderLayer);
+		topLayer = new h2d.Object(screenShaderLayer);
 		overlayLayer = new h2d.Layers();
 
 		s2d.add(screenShaderLayer, 0);
