@@ -214,6 +214,9 @@ class Application extends hxd.App
 			uiLayer.y = oy;
 			uiLayer.setScale(vs); // maybe not this?
 
+			topLayer.x = ox;
+			topLayer.y = oy;
+
 			borders.x = ox;
 			borders.y = oy;
 			borders.setScale(vs);
