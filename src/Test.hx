@@ -1,6 +1,7 @@
 import plib.MathTools;
 import plib.engine.Application;
 import plib.engine.Frame;
+import plib.engine.InputManager.InputMode;
 
 using plib.common.extensions.ArrayExtension;
 using plib.common.extensions.IterableExtension;
@@ -164,6 +165,14 @@ class TestScreen extends plib.engine.Screen
 		{
 			trace('successful');
 		}));
+
+		// inputmode readings
+		app.inputs.onInputModeChanged.add(onInputModeChanged);
+	}
+
+	function onInputModeChanged(inputMode:InputMode)
+	{
+		trace(inputMode);
 	}
 
 	function handleInputs()
@@ -253,6 +262,7 @@ class Test extends Application
 		super.ready();
 		engine.backgroundColor = 0xff0000;
 		Inputs.Init();
+
 		pushScreen(new TestScreen());
 	}
 }

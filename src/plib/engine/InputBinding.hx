@@ -23,49 +23,16 @@ class InputBinding
 
 	public function isPressed()
 	{
-		if (manager.pad.connected)
-		{
-			if (manager.pad.isPressed(manager.getPadButtonValue(button)))
-			{
-				return true;
-			}
-			if (direction != null && manager.isAnalogPressed(direction))
-			{
-				return true;
-			}
-		}
-		return hxd.Key.isPressed(key);
+		return manager.isPressed(this);
 	}
 
 	public function isDown()
 	{
-		if (manager.pad.connected)
-		{
-			if (manager.pad.isDown(manager.getPadButtonValue(button)))
-			{
-				return true;
-			}
-			if (direction != null && manager.isAnalogDown(direction))
-			{
-				return true;
-			}
-		}
-		return hxd.Key.isDown(key);
+		return manager.isDown(this);
 	}
 
 	public function isReleased()
 	{
-		if (manager.pad.connected)
-		{
-			if (manager.pad.isReleased(manager.getPadButtonValue(button)))
-			{
-				return true;
-			}
-			if (direction != null && manager.isAnalogReleased(direction))
-			{
-				return true;
-			}
-		}
-		return hxd.Key.isReleased(key);
+		return manager.isReleased(this);
 	}
 }

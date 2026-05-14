@@ -140,6 +140,11 @@ class Application extends hxd.App
 	{
 		this.s2d.addEventListener(function(e:hxd.Event)
 		{
+			if (inputs != null)
+			{
+				inputs.onSceneEvent(e);
+			}
+
 			switch (e.kind)
 			{
 				case EPush:
