@@ -41,6 +41,7 @@ class Application extends hxd.App
 	private var overlayLayer:h2d.Layers;
 	private var topLayer:h2d.Object;
 	private var screenShaderLayer:h2d.Object; // between screen/overlay/background and overlay layer
+	private var inputLayer:h2d.Interactive;
 
 	// screen management
 	private var screens:Array<Screen>;
@@ -118,8 +119,23 @@ class Application extends hxd.App
 		topLayer = new h2d.Object(screenShaderLayer);
 		overlayLayer = new h2d.Layers();
 
+		inputLayer = new h2d.Interactive(1, 1);
+		inputLayer.propagateEvents = true;
+		inputLayer.onClick = handleEvent;
+		inputLayer.onFocus = handleEvent;
+		inputLayer.onFocusLost = handleEvent;
+		inputLayer.onKeyDown = handleEvent;
+		inputLayer.onKeyUp = handleEvent;
+		inputLayer.onMove = handleEvent;
+		inputLayer.onOut = handleEvent;
+		inputLayer.onOver = handleEvent;
+		inputLayer.onPush = handleEvent;
+		inputLayer.onRelease = handleEvent;
+		inputLayer.onReleaseOutside = handleEvent;
+
 		s2d.add(screenShaderLayer, 0);
 		s2d.add(overlayLayer, 2);
+		s2d.add(inputLayer, 3);
 	}
 
 	@:noCompletion
@@ -136,32 +152,31 @@ class Application extends hxd.App
 	}
 
 	@:noCompletion
-	private function __initEvents()
-	{
-		this.s2d.addEventListener(function(e:hxd.Event)
-		{
-			if (inputs != null)
-			{
-				inputs.onSceneEvent(e);
-			}
+	private function __initEvents() {}
 
-			switch (e.kind)
-			{
-				case EPush:
-				case ERelease:
-				case EMove:
-				case EOver:
-				case EOut:
-				case EWheel:
-				case EFocus:
-				case EFocusLost:
-				case EKeyDown:
-				case EKeyUp:
-				case EReleaseOutside:
-				case ETextInput:
-				case ECheck:
-			}
-		});
+	private function handleEvent(e:hxd.Event)
+	{
+		if (inputs != null)
+		{
+			inputs.onSceneEvent(e);
+		}
+
+		switch (e.kind)
+		{
+			case EPush:
+			case ERelease:
+			case EMove:
+			case EOver:
+			case EOut:
+			case EWheel:
+			case EFocus:
+			case EFocusLost:
+			case EKeyDown:
+			case EKeyUp:
+			case EReleaseOutside:
+			case ETextInput:
+			case ECheck:
+		}
 	}
 
 	override function update(dt:Float)
