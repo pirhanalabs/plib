@@ -251,6 +251,9 @@ class Application extends hxd.App
 			{
 				screens[screenCount - 1].resize();
 			}
+
+			inputLayer.width = window.width;
+			inputLayer.height = window.height;
 		}
 	}
 
