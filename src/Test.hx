@@ -167,12 +167,12 @@ class TestScreen extends plib.engine.Screen
 		}));
 
 		// inputmode readings
-		app.inputs.onInputModeChanged.add(onInputModeChanged);
 	}
 
-	function onInputModeChanged(inputMode:InputMode)
+	override function onInputModeChanged(inputMode:InputMode)
 	{
-		trace(inputMode);
+		super.onInputModeChanged(inputMode);
+		trace('input mode changed!');
 	}
 
 	function handleInputs()

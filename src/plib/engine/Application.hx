@@ -1,5 +1,7 @@
 package plib.engine;
 
+import plib.engine.InputManager.InputMode;
+
 class Application extends hxd.App
 {
 	private static var instance:Application;
@@ -74,8 +76,8 @@ class Application extends hxd.App
 		super.init();
 		__initEngine();
 		__initLayers();
-		__initEvents();
 		__initSystems();
+		__initEvents();
 		__initBorders();
 
 		#if (sys || js)
@@ -137,7 +139,22 @@ class Application extends hxd.App
 	}
 
 	@:noCompletion
-	private function __initEvents() {}
+	private function __initEvents()
+	{
+		inputs.onInputModeChanged.add(onInputModeChanged);
+	}
+
+	private function onInputModeChanged(inputMode:InputMode)
+	{
+		if (screens != null && screens.length > 0)
+		{
+			var i = screens.length;
+			while (--i >= 0)
+			{
+				screens[i].onInputModeChanged(inputMode);
+			}
+		}
+	}
 
 	private function handleEvent(e:hxd.Event)
 	{

@@ -1,5 +1,7 @@
 package plib.engine;
 
+import plib.engine.InputManager.InputMode;
+
 using plib.common.extensions.ArrayExtension;
 
 @:allow(plib.engine.Application)
@@ -101,6 +103,16 @@ class Screen extends UpdateTreeNode
 		Override this in subclasses to add behavior.
 	**/
 	override function postupdate() {}
+
+	/**
+		Triggers when the game's input mode is changed.
+		This triggers in up->bottom fashion, meaning the topmost
+		screen will trigger first.
+	**/
+	private function onInputModeChanged(inputMode:InputMode)
+	{
+		// override this in subclasses
+	}
 
 	// **********************************************************
 	// 									 Common helper methods
