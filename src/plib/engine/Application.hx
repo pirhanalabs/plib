@@ -41,7 +41,6 @@ class Application extends hxd.App
 	private var overlayLayer:h2d.Layers;
 	private var topLayer:h2d.Object;
 	private var screenShaderLayer:h2d.Object; // between screen/overlay/background and overlay layer
-	private var inputLayer:h2d.Interactive;
 
 	// screen management
 	private var screens:Array<Screen>;
@@ -85,6 +84,7 @@ class Application extends hxd.App
 			dispose();
 			return true;
 		};
+		hxd.Window.getInstance().addEventTarget(handleEvent);
 		#end
 
 		onResize();
@@ -119,23 +119,8 @@ class Application extends hxd.App
 		topLayer = new h2d.Object(screenShaderLayer);
 		overlayLayer = new h2d.Layers();
 
-		inputLayer = new h2d.Interactive(1, 1);
-		inputLayer.propagateEvents = true;
-		inputLayer.onClick = handleEvent;
-		inputLayer.onFocus = handleEvent;
-		inputLayer.onFocusLost = handleEvent;
-		inputLayer.onKeyDown = handleEvent;
-		inputLayer.onKeyUp = handleEvent;
-		inputLayer.onMove = handleEvent;
-		inputLayer.onOut = handleEvent;
-		inputLayer.onOver = handleEvent;
-		inputLayer.onPush = handleEvent;
-		inputLayer.onRelease = handleEvent;
-		inputLayer.onReleaseOutside = handleEvent;
-
 		s2d.add(screenShaderLayer, 0);
 		s2d.add(overlayLayer, 2);
-		s2d.add(inputLayer, 3);
 	}
 
 	@:noCompletion
@@ -251,9 +236,6 @@ class Application extends hxd.App
 			{
 				screens[screenCount - 1].resize();
 			}
-
-			inputLayer.width = window.width;
-			inputLayer.height = window.height;
 		}
 	}
 
