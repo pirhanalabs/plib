@@ -2,6 +2,13 @@ package plib.engine;
 
 class CustomCursor
 {
+	public var customScaleXMod:Float = 0;
+	public var customScaleYMod:Float = 0;
+	public var customScaleX:Float = 0;
+	public var customScaleY:Float = 0;
+
+	private var scale:Float = 1;
+
 	public var smoothing:Float = 0.45;
 	public var enabled:Bool;
 
@@ -121,7 +128,7 @@ class CustomCursor
 	@:allow(plib.engine.Application)
 	private function onResize(scale:Float)
 	{
-		this.cursor.setScale(Std.int(scale));
+		this.scale = scale;
 	}
 
 	@:allow(plib.engine.Application)
@@ -138,5 +145,8 @@ class CustomCursor
 	{
 		this.cursor.x += delta_x;
 		this.cursor.y += delta_y;
+
+		this.cursor.scaleX = scale * (customScaleX + customScaleXMod);
+		this.cursor.scaleY = scale * (customScaleY + customScaleYMod);
 	}
 }

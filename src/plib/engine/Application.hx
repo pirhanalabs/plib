@@ -193,7 +193,16 @@ class Application extends hxd.App
 	{
 		super.onResize();
 		vs = hxd.Math.min(window.width / vw, window.height / vh);
-		vs = integerScaling ? Std.int(vs) : vs;
+
+		if (integerScaling)
+		{
+			vs = M.floor(vs);
+			if (vs < 1)
+			{
+				vs = hxd.Math.min(window.width / vw, window.height / vh);
+			}
+		}
+
 		ox = (window.width - vw * vs) * 0.5;
 		oy = (window.height - vh * vs) * 0.5;
 		bordersInvalidated = true;
