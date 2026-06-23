@@ -538,7 +538,7 @@ class M
 	**/
 	public static inline function getRatioW(ratioW:Float, ratioH:Float, height:Float)
 	{
-		return (ratioW * ratioH) / height;
+		return (ratioW / ratioH) * height;
 	}
 
 	/**
