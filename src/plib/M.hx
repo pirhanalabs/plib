@@ -530,4 +530,22 @@ class M
 	{
 		return (1 - t) * (1 - t) * a + 2 * (1 - t) * t * b + t * t * c;
 	}
+
+	/**
+		Finds the width component of a given ratio from its height component.
+
+		e.g. a ratio 5:7 with a height of 260 returns 186.714285
+	**/
+	public static inline function getRatioW(ratioW:Float, ratioH:Float, height:Float)
+	{
+		return (ratioW * ratioH) / height;
+	}
+
+	/**
+		Finds the height component of a given ratio from its width component.
+	**/
+	public static inline function getRatioH(ratioW:Float, ratioH:Float, width:Float)
+	{
+		return (ratioH / ratioW) * width;
+	}
 }
