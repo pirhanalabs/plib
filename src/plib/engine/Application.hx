@@ -1,84 +1,95 @@
 package plib.engine;
 
-import plib.engine.InputManager.InputMode;
+import hxd.Window;
+import plib.engine.input.InputSystem;
+import plib.engine.nodes.LayerNode;
+import plib.engine.nodes.LayersGroupNode.ViewportBorderMode;
+import plib.engine.nodes.LayersGroupNode;
+import plib.engine.nodes.NodeTree.RootNode;
+import plib.engine.nodes.NodeTree;
+import plib.engine.nodes.ScreenManager;
+import plib.engine.save.SaveSystem;
+import plib.engine.save.SaveSystem.SaveBackend;
+import plib.engine.save.SaveSystem.SettingsStore;
 
+/** Standard plib/Heaps bootstrap owning timing, input, persistence, tree, layers, and screens. **/
 class Application extends hxd.App
 {
 	private static var instance:Application;
 
+	/**
+		Static instance getter.
+	**/
 	public static function get()
 	{
-		if (Application.instance == null)
-			throw 'application not created yet.';
-		return Application.instance;
+		return instance;
 	}
 
-	// accessors
-	public var window(default, null):hxd.Window;
-	public var frame(default, null):plib.engine.Frame;
-	public var cursor(default, null):plib.engine.CustomCursor;
-	public var inputs(default, null):plib.engine.InputManager;
-	public var audio(default, null):plib.engine.AudioManager;
+	private final referenceWidth:Int;
+	private final referenceHeight:Int;
+	private final initialIntegerScaling:Bool;
+	private final saveId:String;
 
-	public var vw(default, null):Int;
-	public var vh(default, null):Int;
-	public var vw2(default, null):Float;
-	public var vh2(default, null):Float;
+	/** Automatically created logical root, tree, and presentation layers. **/
+	public var root(default, null):RootNode;
 
-	private var ox(default, null):Float;
-	private var oy(default, null):Float;
+	public var tree(default, null):NodeTree;
+	public var layers(default, null):LayersGroupNode;
+	public var world(get, never):LayerNode;
+	public var hud(get, never):LayerNode;
+	public var windowLayer(get, never):LayerNode;
 
-	private var vs:Float;
-	private var integerScaling:Bool;
+	/** Default main screen stack mounted in the fitted content layer. **/
+	public var screens(default, null):ScreenManager;
 
-	// borders
-	private var hasBorders:Bool;
-	private var bordersInvalidated:Bool;
-	private var borders:h2d.Graphics;
+	/** Modal stack mounted in the HUD overlay. **/
+	public var modals(default, null):ScreenManager;
 
-	// layers
-	private var backgroundLayer:h2d.Object;
-	private var screenLayer:h2d.Object;
-	private var uiLayer:h2d.Object;
-	private var overlayLayer:h2d.Layers;
-	private var topLayer:h2d.Object;
-	private var screenShaderLayer:h2d.Object; // between screen/overlay/background and overlay layer
+	/** Application-owned input sampler and local player/session facade. **/
+	public var inputs(default, null):InputSystem;
+	/** Persistent game saves and the standard preferences store. **/
+	public var saves(default, null):SaveSystem;
+	public var settings(default, null):SettingsStore;
 
-	// screen management
-	private var screens:Array<Screen>;
-	private var screenCount:Int;
+	/** window api **/
+	public var window(default, null):Window;
 
-	private var globalMouseX(get, never):Int;
-	private var globalMouseY(get, never):Int;
+	/** frame information **/
+	public var frame(default, null):Frame;
 
-	private function new(vw:Int, vh:Int)
+	/** Creates the app with a logical world resolution and stable optional persistence namespace. **/
+	public function new(referenceWidth:Int, referenceHeight:Int, integerScaling:Bool, ?saveId:String)
 	{
+		if (instance != null)
+			throw 'Only one Application instance can exist.';
+		if (referenceWidth <= 0 || referenceHeight <= 0)
+			throw 'Application reference dimensions must be positive.';
+
 		super();
-		Application.instance = this;
-		this.vw = vw;
-		this.vh = vh;
-		this.vw2 = vw * 0.5;
-		this.vh2 = vh * 0.5;
-		this.vs = 1;
-		this.ox = 0;
-		this.oy = 0;
-
-		bordersInvalidated = false;
-		integerScaling = true;
-		hasBorders = true;
-
-		screens = [];
-		screenCount = 0;
+		instance = this;
+		this.referenceWidth = referenceWidth;
+		this.referenceHeight = referenceHeight;
+		this.initialIntegerScaling = integerScaling;
+		this.saveId = saveId == null ? defaultSaveId() : saveId;
 	}
 
 	override function init()
 	{
 		super.init();
-		__initEngine();
-		__initLayers();
-		__initSystems();
-		__initEvents();
-		__initBorders();
+
+		window = hxd.Window.getInstance();
+		frame = new Frame();
+		saves = new SaveSystem(saveId, createSaveBackend(saveId));
+		settings = new SettingsStore(saves);
+		root = new RootNode();
+		inputs = root.add(InputSystem.createForHeaps(window));
+		layers = root.add(new LayersGroupNode(referenceWidth, referenceHeight, initialIntegerScaling));
+		screens = layers.world.content.add(createScreenManager());
+		modals = layers.hud.overlay.add(createScreenManager());
+		modals.blocks(screens);
+		tree = new NodeTree(root, s2d, this);
+
+		initializeEngine();
 
 		#if (sys || js)
 		hxd.Window.getInstance().onClose = () ->
@@ -86,193 +97,41 @@ class Application extends hxd.App
 			dispose();
 			return true;
 		};
-		hxd.Window.getInstance().addEventTarget(handleEvent);
 		#end
 
 		onResize();
-
 		haxe.Timer.delay(ready, 1);
 	}
 
-	/** override this for game initialization in boot class. **/
-	private function ready() {}
+	private inline function get_world():LayerNode
+		return layers.world;
 
-	@:noCompletion
-	private function __initSystems()
+	private inline function get_hud():LayerNode
+		return layers.hud;
+
+	private inline function get_windowLayer():LayerNode
+		return layers.window;
+
+	/** Factory hook used for the application's primary and modal screen stacks. **/
+	private function createScreenManager():ScreenManager
 	{
-		this.window = hxd.Window.getInstance();
-		this.frame = new plib.engine.Frame();
-
-		this.cursor = new plib.engine.CustomCursor();
-		overlayLayer.add(this.cursor.cursor, 2);
-		this.cursor.setCursorPosition(window.mouseX, window.mouseY);
-
-		this.inputs = new plib.engine.InputManager();
-		this.audio = new plib.engine.AudioManager();
+		return new ScreenManager();
 	}
 
-	@:noCompletion
-	private function __initLayers()
+	/** Override for Steam Cloud, console storage, or another project-specific backend. **/
+	private function createSaveBackend(id:String):SaveBackend
 	{
-		screenShaderLayer = new h2d.Object();
-		backgroundLayer = new h2d.Object(screenShaderLayer);
-		screenLayer = new h2d.Object(screenShaderLayer);
-		uiLayer = new h2d.Object(screenShaderLayer);
-		topLayer = new h2d.Object(screenShaderLayer);
-		overlayLayer = new h2d.Layers();
-
-		s2d.add(screenShaderLayer, 0);
-		s2d.add(overlayLayer, 2);
+		return SaveSystem.createDefaultBackend(id);
 	}
 
-	@:noCompletion
-	private function __initBorders()
+	private function defaultSaveId():String
 	{
-		borders = new h2d.Graphics();
-		borders.beginFill(0x000000, 1);
-		borders.drawRect(-vw, -vh * 0.5, vw, vh * 2); // left
-		borders.drawRect(-vw * 0.5, -vh, vw * 2, vh); // top
-		borders.drawRect(vw, -vh * 0.5, vw, vh * 2); // right
-		borders.drawRect(-vw * 0.5, vh, vw * 2, vh); // bottom
-		s2d.add(borders, 1);
-		bordersInvalidated = true;
+		var name = Type.getClassName(Type.getClass(this));
+		if (name == null) return 'plib-game';
+		return ~/[^A-Za-z0-9._-]/g.replace(name, '-');
 	}
 
-	@:noCompletion
-	private function __initEvents()
-	{
-		inputs.onInputModeChanged.add(onInputModeChanged);
-	}
-
-	private function onInputModeChanged(inputMode:InputMode)
-	{
-		if (screens != null && screens.length > 0)
-		{
-			var i = screens.length;
-			while (--i >= 0)
-			{
-				screens[i].onInputModeChanged(inputMode);
-			}
-		}
-	}
-
-	private function handleEvent(e:hxd.Event)
-	{
-		if (inputs != null)
-		{
-			inputs.onSceneEvent(e);
-		}
-
-		switch (e.kind)
-		{
-			case EPush:
-			case ERelease:
-			case EMove:
-			case EOver:
-			case EOut:
-			case EWheel:
-			case EFocus:
-			case EFocusLost:
-			case EKeyDown:
-			case EKeyUp:
-			case EReleaseOutside:
-			case ETextInput:
-			case ECheck:
-		}
-	}
-
-	override function update(dt:Float)
-	{
-		super.update(dt);
-		_update(dt);
-		_postupdate();
-		_gc();
-	}
-
-	override function onResize()
-	{
-		super.onResize();
-		vs = hxd.Math.min(window.width / vw, window.height / vh);
-
-		if (integerScaling)
-		{
-			vs = M.floor(vs);
-			if (vs < 1)
-			{
-				vs = hxd.Math.min(window.width / vw, window.height / vh);
-			}
-		}
-
-		ox = (window.width - vw * vs) * 0.5;
-		oy = (window.height - vh * vs) * 0.5;
-		bordersInvalidated = true;
-	}
-
-	private function _update(dt:Float)
-	{
-		frame.update();
-		cursor.setCursorPosition(window.mouseX, window.mouseY);
-		cursor.update(frame);
-		inputs.update(frame);
-
-		if (screenCount > 0)
-		{
-			final screen = screens[screenCount - 1];
-			screen.__update(frame);
-		}
-	}
-
-	private function _postupdate()
-	{
-		cursor.postupdate();
-
-		if (screenCount > 0)
-		{
-			screens[screenCount - 1].__postupdate();
-		}
-
-		if (bordersInvalidated)
-		{
-			backgroundLayer.x = ox;
-			backgroundLayer.y = oy;
-			backgroundLayer.setScale(vs);
-
-			screenLayer.x = ox;
-			screenLayer.y = oy;
-			screenLayer.setScale(vs);
-
-			uiLayer.x = ox;
-			uiLayer.y = oy;
-			uiLayer.setScale(vs); // maybe not this?
-
-			topLayer.x = ox;
-			topLayer.y = oy;
-
-			borders.x = ox;
-			borders.y = oy;
-			borders.setScale(vs);
-
-			borders.visible = hasBorders;
-			bordersInvalidated = false;
-
-			// update other things that need updating when the scale changed
-			cursor.onResize(vs);
-
-			if (screenCount > 0)
-			{
-				screens[screenCount - 1].resize();
-			}
-		}
-	}
-
-	private function _gc()
-	{
-		if (screenCount > 0)
-			screens[screenCount - 1].__gc();
-	}
-
-	@:noCompletion
-	private function __initEngine()
+	private function initializeEngine()
 	{
 		engine.backgroundColor = 0x000000;
 		haxe.MainLoop.add(() -> {}); // sound fix, do not remove
@@ -286,6 +145,8 @@ class Application extends hxd.App
 		hl.Api.setErrorHandler(onCrash);
 		#end
 	}
+
+	private function ready() {}
 
 	#if hl
 	private function onCrash(error:Dynamic)
@@ -317,19 +178,23 @@ class Application extends hxd.App
 	}
 	#end
 
-	public function mouseToLocal(obj:h2d.Object)
+	// ---- helpers ----
+
+	/** Selects empty viewport margins or solid physical-window bands. **/
+	public inline function setBorderMode(mode:ViewportBorderMode)
 	{
-		var p = obj.globalToLocal(new h2d.col.Point(globalMouseX, globalMouseY));
-		return p;
+		layers.setBorderMode(mode);
 	}
 
-	public function isMouseOver(obj:h2d.Object)
+	/** Enables or disables integer fitting and reapplies presentation layout. **/
+	public function setIntegerScaling(enabled:Bool)
 	{
-		var p = mouseToLocal(obj);
-		var s = obj.getSize();
-		return p.x >= 0 && p.y >= 0 && p.x < s.width && p.y < s.height;
+		world.setIntegerScaling(enabled);
 	}
 
+	/**
+		Maximize the window context.
+	**/
 	public function maximizeWindow()
 	{
 		#if (hlsdl || hldx)
@@ -337,6 +202,9 @@ class Application extends hxd.App
 		#end
 	}
 
+	/**
+		Sets the position of the window.
+	**/
 	public function setWindowPosition(x:Int, y:Int)
 	{
 		#if (hlsdl || hldx)
@@ -344,63 +212,26 @@ class Application extends hxd.App
 		#end
 	}
 
-	public function setScreen(screen:Screen):Void
+	// ---- processing ----
+
+	override function onResize()
 	{
-		while (screenCount > 0)
-		{
-			// we dont use popScreen to avoid focusing the next screen.
-			var current = screens[screens.length - 1];
-			current.camera.ob1.remove();
-			current.destroy();
-			screens.pop();
-			screenCount--;
-		}
-		pushScreen(screen);
+		super.onResize();
+		if (layers == null)
+			return;
+
+		var currentWindow = window == null ? hxd.Window.getInstance() : window;
+		layers.resize(currentWindow.width, currentWindow.height);
+		if (tree != null)
+			tree.resize();
 	}
 
-	public function pushScreen(screen:Screen):Void
+	override function update(dt:Float)
 	{
-		if (screenCount > 0)
-		{
-			getCurrentScreen().unfocus();
-		}
-		screens.push(screen);
-		screenCount++;
+		super.update(dt);
 
-		screen.__init(this);
-		screenLayer.addChild(screen.camera.ob1);
-		screen.ready();
-	}
-
-	public function popScreen():Screen
-	{
-		if (screenCount == 0)
-			return null;
-
-		var screen = screens.pop();
-		screen.camera.ob1.remove();
-		screen.destroy();
-		screenCount--;
-
-		if (screenCount > 0)
-		{
-			getCurrentScreen().focus();
-		}
-		return screen;
-	}
-
-	inline function getCurrentScreen()
-	{
-		return screens[screenCount - 1];
-	}
-
-	inline function get_globalMouseX()
-	{
-		return Std.int(s2d.mouseX);
-	}
-
-	inline function get_globalMouseY()
-	{
-		return Std.int(s2d.mouseY);
+		frame.update();
+		inputs.updateState(frame.dt);
+		tree.process(frame);
 	}
 }

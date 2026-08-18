@@ -1,551 +1,401 @@
 package plib;
 
-/**
-	Replacement for MathTools.hx eventually (one day, one day...)
-**/
 class M
 {
-	inline public static final PI_HALF = 1.5707963267948966;
-	inline public static final PI = 3.141592653589793;
-	inline public static final PI2 = 6.283185307179586;
-	inline public static final ANGLE_360 = PI2;
-	inline public static final ANGLE_180 = PI;
-	inline public static final ANGLE_90 = PI_HALF;
-	inline public static final ANGLE_45 = 0.785398163397448;
-	inline public static final SQRT2 = 1.414213562373095;
+	public static inline var PIHALF = 1.5707963267948966;
+	public static inline var PI = 3.141592653589793;
+	public static inline var PI2 = 6.283185307179586;
+	public static inline var ANGLE_360 = PI2;
+	public static inline var ANGLE_180 = PI;
+	public static inline var ANGLE_90 = PIHALF;
+	public static inline var ANGLE_45 = 0.785398163397448;
+	public static inline var SQRT2 = 1.414213562373095;
 
-	inline public static final RAD_TO_DEG = 180 / PI;
-	inline public static final DEG_TO_RAD = PI / 180;
+	public static inline var RAD_TO_DEG = 180 / PI;
+	public static inline var DEG_TO_RAD = PI / 180;
 
-	inline public static final UINT8_MAX = 0xFF;
-	inline public static final INT8_MAX = 0x7F;
-	inline public static final INT8_MIN = -0x80;
-	inline public static final UNIT16_MAX = 0xFFFF;
-	inline public static final INT16_MAX = 0x7FFF;
-	inline public static final INT16_MIN = -0x8000;
-	inline public static final UINT32_MAX = 0xFFFFFFFF;
-	inline public static final INT32_MAX = 0x7FFFFFFF;
-	inline public static final INT32_MIN = -0x80000000;
-	inline public static final FLOAT_MAX = 3.4028234663852886e+38;
-	inline public static final FLOAT_MIN = -3.4028234663852886e+38;
-	inline public static final DOUBLE_MAX = 1.7976931348623157e+308;
-	inline public static final DOUBLE_MIN = -1.7976931348623157e+308;
+	public static inline var UINT8_MAX = 0xFF;
+	public static inline var INT8_MAX = 0x7F;
+	public static inline var INT8_MIN = -0x80;
+	public static inline var UNIT16_MAX = 0xFFFF;
+	public static inline var INT16_MAX = 0x7FFF;
+	public static inline var INT16_MIN = -0x8000;
+	public static inline var UINT32_MAX = 0xFFFFFFFF;
+	public static inline var INT32_MAX = 0x7FFFFFFF;
+	public static inline var INT32_MIN = -0x80000000;
+	public static inline var FLOAT_MAX = 3.4028234663852886e+38;
+	public static inline var FLOAT_MIN = -3.4028234663852886e+38;
+	public static inline var DOUBLE_MAX = 1.7976931348623157e+308;
+	public static inline var DOUBLE_MIN = -1.7976931348623157e+308;
+
+	public static inline var EPS = 1e-6;
 
 	/**
-		Returns Nan value.
+		Returns the maximum integer value that is not greater than v.
 	**/
-	public static inline function NaN()
+	public static inline function floor(v:Float):Int
 	{
-		return Math.NaN;
+		return Math.floor(v);
 	}
 
 	/**
-		Returns positive infinity value.
+		Returns the smallest integer value that is not less than v.
 	**/
-	public static inline function POSITIVE_INFINITY()
+	public static inline function ceil(v:Float):Int
 	{
-		return Math.POSITIVE_INFINITY;
+		return Math.ceil(v);
 	}
 
 	/**
-		Returns negative infinity value.
+		Rounds v to the nearest integer value.
 	**/
-	public static inline function NEGATIVE_INFINITY()
+	public static inline function round(v:Float):Int
 	{
-		return Math.NEGATIVE_INFINITY;
+		// return abs(v % 1) < 0.5 ? floor(v) : ceil(v);
+		return Std.int(v > 0 ? v + 0.5 : v < 0 ? v - 0.5 : 0);
 	}
 
-	/**
-		Converts degrees to radians.
-	**/
-	public static inline function toRadian(deg:Float)
+	/** Clamps a value between min and max. **/
+	public static inline function clamp<T:Float>(val:T, min:T, max:T):T
 	{
-		return deg * MathTools.DEG_TO_RAD;
+		return val < min ? min : val > max ? max : val;
 	}
 
-	/**
-		Converts radians to degrees.
-	**/
-	public static inline function toDegree(rad:Float)
-	{
-		return rad * MathTools.RAD_TO_DEG;
-	}
-
-	/**
-		Linear interpolation over interval with t = 0...1.
-	**/
-	public static inline function lerp(a:Float, b:Float, t:Float):Float
-	{
-		return a * (1 - t) + b * t;
-	}
-
-	/**
-		Linear interpolation over interval with deltatime with 1 = 0...1.
-	**/
-	public static inline function lerpDelta(a:Float, b:Float, t:Float, dt:Float):Float
-	{
-		return lerp(a, b, fmin(t * dt, 1.0));
-	}
-
-	/**
-		Lerps an angle between `a` (inclusive) and `b` (inclusive), by normalized delta `t`.
-	**/
-	public static inline function lerp_a(a:Float, b:Float, t:Float):Float
-	{
-		final d = wrap_a(b - a, -PI, PI);
-		return a + d * t;
-	}
-
-	/**
-		Wraps a value between min (inclusive) and max (exclusive).
-	**/
-	public static inline function wrap_a(v:Float, min:Float, max:Float):Float
-	{
-		var r = max - min;
-		return v - r * floor((v - min) / r);
-	}
-
-	/**
-		Wraps a float value between `min` (inclusive) and `max` (inclusive).
-		If you need exclusive, use `M.wrap_a()` instead.
-	**/
-	public static inline function wrap_f(v:Float, min:Float, max:Float):Float
-	{
-		final r = max - min;
-		return if (r == 0) min; else if (r < min) max - (min - v) % r; else if (r > max) min - (v - max) % r; else v;
-	}
-
-	/**
-		Wraps an integer value between `min` (inclusive) and `max` (exclusive).
-	**/
-	public static inline function wrap_i(v:Int, min:Int, max:Int):Int
-	{
-		final r = max - min;
-		var x = (v - min) % r;
-		if (x < 0)
-			x += r;
-		return x + min;
-	}
-
-	/**
-			Smoothdamp for angles.
-		@param a starting angle
-		@param b target angle
-		@param v velocity object
-		@param t smooth time
-		@param d delta time
-		@param s max speed
-
-	**/
-	public static inline function smoothdamp_a(a:Float, b:Float, v:{v:Float}, t:Float, d:Float, s:Float = FLOAT_MAX)
-	{
-		final diff = wrap_a(b - a, -PI, PI);
-		b = a + diff;
-
-		final ob = b;
-		t = fmax(0.0001, t);
-
-		final o = 2 / t;
-		final x = o * d;
-		final exp = 1 / (1 + x + .48 * x * x + .235 * x * x * x);
-
-		var c = a - b;
-		var m = s * t;
-		c = clamp(c, -m, m);
-		b = a - c;
-
-		final tmp = (v.v + o * c) * d;
-		v.v = (v.v - o * tmp) * exp;
-
-		var out = b + (c + tmp) * exp;
-
-		if ((ob - a > 0) == (out > ob))
-		{
-			out = ob;
-			v.v = 0;
-		}
-
-		return wrap_a(out, -PI, PI);
-	}
-
-	/**
-			Standard smoothdamp.
-		@param a starting angle
-		@param b target angle
-		@param v velocity object
-		@param t smooth time
-		@param d delta time
-		@param s max speed
-
-	**/
-	public static inline function smoothdamp(a:Float, b:Float, v:{v:Float}, t:Float, d:Float, s:Float = FLOAT_MAX)
-	{
-		t = fmax(0.0001, t);
-
-		final o = 2.0 / t;
-		final x = o * d;
-		final exp = 1 / (1 + x + .48 * x * x + .235 * x * x * x);
-
-		var c = a - b;
-		var ob = b;
-
-		// clamp s
-		final mc = s * t;
-		c = clamp(c, -mc, mc);
-		b = a - c;
-
-		final tmp = (v.v + o * c) * d;
-		v.v = (v.v - o * tmp) * exp;
-
-		var out = b + (c + tmp) * exp;
-
-		// prevent overshoot
-		if ((ob - a > 0) == (out > ob))
-		{
-			out = ob;
-			v.v = 0;
-		}
-
-		return out;
-	}
-
-	/**
-		Clamps `v` between `min` (inclusive) and `max` (inclusive)
-	**/
-	@:generic
-	public static inline function clamp<T:Float>(v:T, min:T, max:T):T
-	{
-		return v < min ? min : v > max ? max : v;
-	}
-
-	/**
-		Gets the maximum value from the arguments.
-	**/
-	@:generic
-	public static inline function max<T:Float>(...args:T):T
-	{
-		var v:T = args[0];
-		for (arg in args)
-		{
-			if (v < arg)
-			{
-				v = arg;
-			}
-		}
-		return v;
-	}
-
-	/**
-		Gets the minimum value from the arguments.
-	**/
-	@:generic
-	public static inline function min<T:Float>(...args:T):T
-	{
-		var v:T = args[0];
-		for (arg in args)
-		{
-			if (v > arg)
-			{
-				v = arg;
-			}
-		}
-		return v;
-	}
-
-	/**
-		Gets the maximum value between `a` and `b`.
-	**/
-	@:generic
-	public static inline function fmax<T:Float>(a:T, b:T):T
-	{
-		return a < b ? b : a;
-	}
-
-	/**
-		Gets the minimum value between `a` and `b`.
-	**/
-	@:generic
-	public static inline function fmin<T:Float>(a:T, b:T):T
+	/** Returns the smallest value between a and b. **/
+	public static inline function min<T:Float>(a:T, b:T):T
 	{
 		return a < b ? a : b;
 	}
 
-	/**
-		Returns the maximum integer value that is not greater than `v`.
-	**/
-	public static inline function floor(v:Float):Int
+	/** Returns the biggest value between a and b. **/
+	public static inline function max<T:Float>(a:T, b:T):T
 	{
-		return cast ffloor(v);
+		return a < b ? b : a;
 	}
 
-	/**
-		Returns the maximum integer value that is not greater than `v`, as a Float.
-	**/
-	public static inline function ffloor(v:Float):Float
-	{
-		return v - (v % 1);
-	}
-
-	/**
-		Returns the smallest integer value that is not less than 'v'.
-	**/
-	public static inline function ceil(v:Float):Int
-	{
-		return cast fceil(v);
-	}
-
-	/**
-		Returns the smallest integer value that is not less than 'v', as a Float.
-	**/
-	public static inline function fceil(v:Float):Float
-	{
-		return v + (v % 1);
-	}
-
-	/**
-		Rounds `v` to the nearest integer value.
-	**/
-	public static inline function round(v:Float):Int
-	{
-		return cast fround(v);
-	}
-
-	/**
-		Rounds `v` to the nearest integer value, as a Float.
-	**/
-	public static inline function fround(v:Float):Float
-	{
-		return fabs(v % 1) < 0.5 ? ffloor(v) : fceil(v);
-	}
-
-	/**
-		Returns the absolute value of `v`.
-	**/
-	@:generic
-	public static inline function fabs<T:Float>(v:T):T
+	/** Returns the absolute value of a number. **/
+	public static inline function abs<T:Float>(v:T):T
 	{
 		return v < 0 ? -v : v;
 	}
 
-	/**
-		Returns the square root of a number
-	**/
-	public static inline function sqrt(num:Float):Float
+	/** Returns the square value of a number. **/
+	public static inline function square<T:Float>(v:T):T
 	{
-		var t = 0.0;
-		var r = num * 0.5;
-		do
+		return v * v;
+	}
+
+	/** Returns the cube value of a number. **/
+	public static inline function cube<T:Float>(v:T):T
+	{
+		return square(square(v));
+	}
+
+	/** pow for floating point exponents. **/
+	public static inline function pow(v:Float, e:Float):Float
+	{
+		return Math.pow(v, e);
+	}
+
+	/** efficient pow for integer exponents. **/
+	public static function ipow(v:Float, e:Int):Float
+	{
+		if (e == 0)
 		{
-			t = r;
-			r = (t + (num / t)) * 0.5;
+			return 1.0;
 		}
-		while ((t - r) != 0);
-		return r;
+
+		if (e < 0)
+		{
+			v = 1 / v;
+			e = -e;
+		}
+
+		if (e <= 4)
+		{
+			switch (e)
+			{
+				case 1:
+					return v;
+				case 2:
+					return v * v;
+				case 3:
+					return v * v * v;
+				case 4:
+					return cube(v);
+				default:
+			}
+		}
+
+		var result = 1.0;
+		var product = v;
+
+		while (e > 0)
+		{
+			// if lowest bit is 1 (odd number) using bitwise AND
+			if ((e & 1) == 1)
+			{
+				result *= product;
+			}
+			product *= product;
+			e = e >> 1;
+		}
+		return result;
 	}
 
-	/**
-		Fast inverse square root of num.
-	**/
-	public static function invsqrt(num:Float):Float
+	/** Returns the distance between two points. **/
+	public static inline function dist(x1:Float, y1:Float, x2:Float, y2:Float):Float
 	{
-		return 1 / sqrt(num);
+		var dx = x2 - x1;
+		var dy = y2 - y1;
+		return Math.sqrt((dx * dx) + (dy * dy));
 	}
 
-	/**
-		Spaces values around 0, depending on `spacing`, `quantity` of elements and the current `index`.
-		Values can be offset by setting `offset`.
-	**/
-	public static function layout(spacing:Float, quantity:Int, index:Int, offset:Float = 0.0)
+	/** Returns the squared distance between two points. **/
+	public static inline function distsq(x1:Float, y1:Float, x2:Float, y2:Float):Float
 	{
-		return (-spacing * (quantity - 1) * 0.5) + (spacing * index) + offset;
+		var dx = x2 - x1;
+		var dy = y2 - y1;
+		return (dx * dx) + (dy * dy);
 	}
 
-	/**
-		Returns the sign of v.
-	**/
+	/** Returns true if [x2, y2] is within distance of [x1, y1]. **/
+	public static inline function inrange(x1:Float, y1:Float, x2:Float, y2:Float, distance:Float):Bool
+	{
+		return distsq(x1, y1, x2, y2) < (distance * distance);
+	}
+
+	/** Returns true if v is between min and max. **/
+	public static inline function between(v:Float, min:Float, max:Float):Bool
+	{
+		return v >= min && v <= max;
+	}
+
+	/** Returns the sign of v. **/
 	public static inline function sign(v:Float):Int
 	{
 		return v < 0 ? -1 : v > 0 ? 1 : 0;
 	}
 
-	/**
-		Returns true if a and b have the same sign.
-	**/
+	/** Returns true if a and b have the same sign. **/
 	public static inline function eqsign(a:Float, b:Float):Bool
 	{
-		return a * b >= 0;
+		return a * b >= 0.0;
 	}
 
-	/**
-		Returns a seeded random number for a x/y coord. Result range 0->max (inclusive).
-	**/
-	public static inline function randSeedCoords(seed:Int, x:Int, y:Int, max:Int)
-	{
-		var h = seed + x * 374761393 + y * 668265263;
-		h = (h ^ (h >> 13)) * 1274126177;
-		return (h ^ (h >> 16)) % max;
-	}
-
-	/**
-		Snaps a value to an interval.
-	**/
-	public static inline function snapval(v:Float, interval:Float)
-	{
-		return round(v / interval) * interval;
-	}
-
-	/**
-		Rounds a float to given precision.
-	**/
+	/** Rounds a float to the given precision. **/
 	public static inline function pretty(x:Float, precision:Int = 0):Float
 	{
 		if (precision == 0)
 			return round(x);
-		var d = Math.pow(10, precision);
+		var d = ipow(10, precision);
 		return round(x * d) / d;
 	}
 
-	/**
-		Returns the angle between two points, in radians.
-	**/
-	public static inline function angle(x1:Float, y1:Float, x2:Float, y2:Float)
+	/** Returns true if v is even. **/
+	public static inline function even(v:Int)
 	{
-		return Math.atan2(y2 - y1, x2 - x1);
+		return (v & 1) == 0;
+	}
+
+	/** Returns the decimals of a given float, always positive. **/
+	public static inline function positiveDecimals(v:Float):Float
+	{
+		return abs(v - Std.int(v));
+	}
+
+	/** Returns the square root of v. **/
+	public static inline function sqrt(v:Float):Float
+	{
+		return Math.sqrt(v);
+	}
+
+	/** Returns the quake-style inverse square root of v. **/
+	public static inline function invsqrt(v:Float):Float
+	{
+		return 1 / sqrt(v);
+	}
+
+	/** compare two numbers using epsilon. **/
+	public static inline function compare(a:Float, b:Float, eps:Float):Bool
+	{
+		return compareZero(a - b, eps);
+	}
+
+	/** compare a number against zero using an epsilon. **/
+	public static inline function compareZero(v:Float, eps:Float):Bool
+	{
+		return v > 0 ? v < eps : -v < eps;
+	}
+
+	/** Converts the boolean expression to an integer.**/
+	public static inline function bool(v:Bool):Int
+	{
+		return v ? 1 : 0;
+	}
+
+	/** Sets a bit. **/
+	public static inline function setBit(v:Int, bit:Int)
+	{
+		return v | (1 << bit);
+	}
+
+	/** Unsets a bit. **/
+	public static inline function unsetBit(v:Int, bit:Int)
+	{
+		return v & ~(1 << bit);
+	}
+
+	/** Returns true if the integer has the given bit. **/
+	public static inline function hasBit(v:Int, bit:Int)
+	{
+		return v & (1 << bit) != 0;
 	}
 
 	/**
-		Randomly picks a float between min and max, unseeded.    
+		Returns a bitmask from bools.
 	**/
-	public static inline function rand(min:Float, max:Float)
+	public static function bitsFromBools(a = false, b = false, c = false, d = false, e = false, f = false, g = false, h = false)
 	{
-		return Math.random() * (max - min) + min;
+		var v = 0;
+		if (a)
+			v = setBit(v, 0);
+		if (b)
+			v = setBit(v, 1);
+		if (c)
+			v = setBit(v, 2);
+		if (d)
+			v = setBit(v, 3);
+		if (e)
+			v = setBit(v, 4);
+		if (f)
+			v = setBit(v, 5);
+		if (g)
+			v = setBit(v, 6);
+		if (h)
+			v = setBit(v, 7);
+		return v;
+	}
+
+	public static inline function shuffle<T>(a:Array<T>)
+	{
+		hxd.Math.shuffle(a);
+	}
+
+	public static inline function sin(v:Float)
+	{
+		return Math.sin(v);
+	}
+
+	/** Sin, but from [0-1] **/
+	public static inline function sinNormalized(a:Float)
+	{
+		return (1 + sin(a)) * 0.5;
+	}
+
+	public static inline function cos(v:Float)
+	{
+		return Math.cos(v);
+	}
+
+	/** Cos, but from [0-1] **/
+	public static inline function cosNormalized(a:Float)
+	{
+		return (1 + cos(a)) * 0.5;
+	}
+
+	public static inline function atan(v:Float)
+	{
+		return Math.atan(v);
+	}
+
+	public static inline function atan2(y:Float, x:Float)
+	{
+		return Math.atan2(y, x);
+	}
+
+	public static inline function asin(v:Float)
+	{
+		return Math.asin(v);
+	}
+
+	public static inline function acos(v:Float)
+	{
+		return Math.acos(v);
+	}
+
+	public static inline function rotateX(x:Float, y:Float, cx:Float, cy:Float, a:Float)
+	{
+		return cx + (x - cx) * cos(a) + (y - cy) * sin(a);
+	}
+
+	public static inline function rotateY(x:Float, y:Float, cx:Float, cy:Float, a:Float)
+	{
+		return cy - (x - cx) * sin(a) + (y - cy) * cos(a);
+	}
+
+	public static inline function toRadian(deg:Float)
+	{
+		return deg * DEG_TO_RAD;
+	}
+
+	public static inline function toDegrees(rad:Float)
+	{
+		return rad * RAD_TO_DEG;
 	}
 
 	/**
-		Randomly picks an integer between min and max, unseeded.
+		Wraps a float value between [min, max)
 	**/
-	public static inline function irand(min:Int, max:Int):Int
+	public static inline function wrap(v:Float, min:Float, max:Float):Float
 	{
-		return Math.floor(Math.random() * (max - min + 1)) + min;
+		final r = max - min;
+		return r <= 0 ? min : min + mod(v - min, r);
 	}
 
 	/**
-		Random number variance on val. Can set different up and down normalized variance.
+		Convenience wrap for angles.
 	**/
-	public static inline function variance(val:Float, dw:Float, up:Float):Float
+	public static inline function wrapRad(v:Float):Float
 	{
-		return rand(val * dw, val * up);
+		return mod(v, PI2);
 	}
 
 	/**
-		Returns a random index from a list of float weights.
+		Wraps an integer value between [min, max)
 	**/
-	public static inline function weightIndex(elements:Array<Float>)
+	public static inline function iwrap(v:Int, min:Int, max:Int):Int
 	{
-		var total = 0.0;
-		for (val in elements)
-			total += val;
+		final r = max - min;
 
-		total = M.rand(0, total);
-		for (i in 0...elements.length)
-		{
-			if (total < elements[i])
-				return i;
-			total -= elements[i];
-		}
-		return -1;
+		if (r == 0)
+			return min;
+
+		var result = (v - min) % r;
+
+		if (result < 0)
+			result += r;
+
+		return result + min;
 	}
 
 	/**
-		Random number variance on val. Can set different up and down normalized variance.
+		Modulus that wraps v to [0, m). Works for negative values as well.
+
+		Zero or negative modulus results are unspecified.
 	**/
-	public static inline function ivariance(val:Int, dw:Float, up:Float):Int
+	public static inline function mod(v:Float, m:Float):Float
 	{
-		return Math.floor(variance(val, dw, up));
+		return ((v % m) + m) % m;
 	}
 
 	/**
-		Returns the distance between two points
-	**/
-	public static inline function distance(x1:Float, y1:Float, x2:Float, y2:Float)
-	{
-		return Math.sqrt((x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2));
-	}
+		Modulus that wraps v to [0, m). Works for negative values as well.
 
-	/**
-		Picks a random item from an array, unseeded.
+		Zero or negative modulus results are unspecified.
 	**/
-	public static inline function pick<T>(a:Array<T>, start = -1, end:Int = -1):T
+	public static inline function imod(v:Int, m:Int):Int
 	{
-		start = start < 0 ? 0 : start;
-		end = end < 0 ? a.length - 1 : end;
-		return a[MathTools.irand(start, end)];
-	}
-
-	/**
-		Returns a random sign. Unseeded.
-	**/
-	public static inline function randsign()
-	{
-		return sign(irand(-1, 1) + 0.1);
-	}
-
-	/**
-		Modulo supporting negative values.
-	**/
-	public inline static function modneg(n:Float, mod:Float)
-	{
-		while (n > mod)
-			n -= mod * 2;
-		while (n < -mod)
-			n += mod * 2;
-		return n;
-	}
-
-	/**
-		Converts a value from a range to another range.
-	**/
-	public static inline function toRange(val:Float, omin:Float, omax:Float, nmin:Float, nmax:Float)
-	{
-		return (((val - omin) * (nmax - nmin)) / (omax - omin)) + nmin;
-	}
-
-	/**
-		Gets a subrange ratio (0...1) between min and max.
-		If val is out of bounds, it will either be 0 or 1.
-	**/
-	public static function rangeRatio(val:Float, min:Float, max:Float)
-	{
-		return Math.min(1, Math.max(0, val - min) / (max - min));
-	}
-
-	/**
-		Creates a bezier curve. It is applied to a single axis at a time (x or y). call this on each to get a bezier curve point
-		@param t progress on the bezier curve
-		@param a first point on the bezier curve
-		@param b second point on the bezier curve
-		@param c third point on the bezier curve
-	**/
-	public static inline function bezier3(t:Float, a:Float, b:Float, c:Float)
-	{
-		return (1 - t) * (1 - t) * a + 2 * (1 - t) * t * b + t * t * c;
-	}
-
-	/**
-		Finds the width component of a given ratio from its height component.
-
-		e.g. a ratio 5:7 with a height of 260 returns 186.714285
-	**/
-	public static inline function getRatioW(ratioW:Float, ratioH:Float, height:Float)
-	{
-		return (ratioW / ratioH) * height;
-	}
-
-	/**
-		Finds the height component of a given ratio from its width component.
-	**/
-	public static inline function getRatioH(ratioW:Float, ratioH:Float, width:Float)
-	{
-		return (ratioH / ratioW) * width;
+		return ((v % m) + m) % m;
 	}
 }

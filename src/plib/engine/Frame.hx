@@ -1,7 +1,9 @@
 package plib.engine;
 
+/** Application-owned timing snapshot passed through node updates each frame. **/
 class Frame
 {
+	/** Multiplies `dt` and `tmod`; use for global slow motion, not pausing nodes. **/
 	public var mod:Float = 1.0;
 
 	/**
@@ -35,11 +37,11 @@ class Frame
 	**/
 	public var frames(default, null):Float = 0;
 
-	@:allow(plib.engine.Application)
-	private function new() {}
+	/** Creates an empty snapshot; `Application` normally owns and updates it. **/
+	public function new() {}
 
-	@:allow(plib.engine.Application)
-	private function update()
+	/** Samples the Heaps timer and advances elapsed time and frame count. **/
+	public function update()
 	{
 		dt = hxd.Timer.elapsedTime * mod;
 		fps = hxd.Timer.fps();

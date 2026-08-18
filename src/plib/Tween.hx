@@ -1,155 +1,247 @@
 package plib;
 
-/**
- * typedef for custom tweens
-**/
-typedef TweenFn = (p:Float) -> Float;
-
+/** Allocation-free interpolation helpers used by animations and camera motion. **/
 class Tween
 {
-	/**
-	 * 
-	 * usage
-	 * 
-	 *      Tween.lerp(0, 5, time/timemax)
-	 *      Tween.lerp(0, 5, Tween.outElastic(time/timemax))
-	 * 
-	 * @param a start value
-	 * @param b end value
-	 * @param p progress percent (0-1)
-	 */
-	public static function lerp(a:Float, b:Float, p:Float)
+	/** Linearly interpolates without clamping `t`. **/
+	public static inline function lerp(a:Float, b:Float, t:Float):Float
 	{
-		return MathTools.lerp(a, b, p);
+		return a * (1 - t) + b * t;
 	}
 
-	public static function linear(p:Float)
+	/** Applies frame-rate-independent exponential interpolation toward `b`. **/
+	public static inline function lerpdt(a:Float, b:Float, t:Float, dt:Float):Float
 	{
-		return p;
+		return lerp(a, b, M.min(t * dt, 1));
 	}
 
-	public static function easeIn(p:Float)
+	/** Linearly interpolates with `t` clamped to `[0, 1]`. **/
+	public static inline function lerpClamped(a:Float, b:Float, t:Float):Float
 	{
-		return p * p;
-	}
-
-	public static function easeOut(p:Float)
-	{
-		return flip(easeIn(flip(p)));
-	}
-
-	public static function easeInOut(p:Float)
-	{
-		return lerp(easeIn(p), easeOut(p), p);
-	}
-
-	public static function spike(p:Float)
-	{
-		return customSpike(linear, linear, p);
-	}
-
-	public static function spikeEaseIn(p:Float)
-	{
-		return customSpike(easeIn, easeIn, p);
-	}
-
-	public static function spikeEaseOut(p:Float)
-	{
-		return customSpike(easeOut, easeOut, p);
-	}
-
-	public static function spikeEaseInOut(p:Float)
-	{
-		return customSpike(easeInOut, easeInOut, p);
+		return lerp(a, b, M.clamp(t, 0, 1));
 	}
 
 	/**
-		Custom spike to have different behavior in two halves.
-		Note: the 2nd half is flipped.
+		Shortest-path angle interpolation.
 	**/
-	public static function customSpike(a:TweenFn, b:TweenFn, p:Float)
+	public static inline function angle(from:Float, to:Float, t:Float):Float
 	{
-		if (p < 0.5)
-			return a(p / 0.5);
-		return b(flip(p) / 0.5);
-	}
-
-	public static function elasticEaseOut(p:Float)
-	{
-		return pow(2, -10 * p) * sin((p * 10 - 0.75) * (2 * Math.PI) / 3) + 1;
-	}
-
-	public static function elasticEaseIn(p:Float)
-	{
-		return flip(elasticEaseOut(flip(p)));
-	}
-
-	public static function elasticEaseInOut(p:Float)
-	{
-		return lerp(elasticEaseIn(p), elasticEaseOut(p), p);
-	}
-
-	public static function bounceEaseOut(x:Float)
-	{
-		var n1 = 7.5625;
-		var d1 = 2.75;
-		if (x < 1 / d1)
-			return n1 * x * x;
-		if (x < 2 / d1)
-			return n1 * (x -= 1.5 / d1) * x + 0.75;
-		if (x < 2.5 / d1)
-			return n1 * (x -= 2.25 / d1) * x + 0.9375;
-		return n1 * (x -= 2.625 / d1) * x + 0.984375;
-	}
-
-	public static function bounceEaseIn(p:Float)
-	{
-		return flip(bounceEaseOut(flip(p)));
-	}
-
-	public static function bounceEaseInOut(p:Float)
-	{
-		return lerp(bounceEaseIn(p), bounceEaseOut(p), p);
-	}
-
-	public static function backEaseOut(p:Float)
-	{
-		final c1 = 1.70158;
-		final c2 = c1 + 1;
-		return 1 + c2 * pow(p - 1, 3) + c1 * pow(p - 1, 2);
-	}
-
-	public static function backEaseIn(p:Float)
-	{
-		final c1 = 1.70158;
-		final c2 = c1 + 1;
-		return c2 * p * p * p - c1 * p * p;
+		var delta = M.mod(to - from + M.PI, M.PI2) - M.PI;
+		return from + delta * t;
 	}
 
 	/**
-		Creates a bezier curve. It is applied to a single axis at a time (x or y). call this on each to get a bezier curve point
-		@param p progress on the bezier curve
-		@param a first point on the bezier curve
-		@param b second point on the bezier curve
-		@param c third point on the bezier curve
+		Finds the clamped ratio between two values.
 	**/
-	public static inline function bezier3(p:Float, a:Float, b:Float, c:Float)
+	public static inline function ratioClamped(a:Float, b:Float, v:Float):Float
 	{
-		return (1 - p) * (1 - p) * a + 2 * (1 - p) * p * b + p * p * c;
+		return M.clamp(ratio(a, b, v), 0.0, 1.0);
 	}
 
-	public static function flip(p:Float)
+	/**
+		Finds the ratio between two values.
+	**/
+	public static inline function ratio(a:Float, b:Float, v:Float):Float
 	{
-		return 1 - p;
+		return a == b ? 0 : (v - a) / (b - a);
 	}
 
-	private static inline function sin(v:Float)
+	/** Returns the unclamped ratio locating `v` between `a` and `b`. **/
+	public static inline function inverseLerp(a:Float, b:Float, v:Float):Float
 	{
-		return Math.sin(v);
+		return ratio(a, b, v);
 	}
 
-	private static inline function pow(v:Float, exp:Float)
+	/** Returns the ratio locating `v` between `a` and `b`, clamped to `[0, 1]`. **/
+	public static inline function inverseLerpClamped(a:Float, b:Float, v:Float):Float
 	{
-		return Math.pow(v, exp);
+		return ratioClamped(a, b, v);
 	}
+
+	/**
+		Converts one range to another.
+	**/
+	public static inline function remap(inMin:Float, inMax:Float, outMin:Float, outMax:Float, v:Float)
+	{
+		return lerp(outMin, outMax, ratio(inMin, inMax, v));
+	}
+
+	/**
+		Converts one range to another, clamped.
+	**/
+	public static inline function remapClamped(inMin:Float, inMax:Float, outMin:Float, outMax:Float, v:Float)
+	{
+		return lerp(outMin, outMax, ratioClamped(inMin, inMax, v));
+	}
+
+	/** Samples a scalar quadratic Bézier curve. **/
+	public static inline function quadraticBezier(start:Float, control:Float, end:Float, t:Float):Float
+	{
+		final a = lerp(start, control, t);
+		final b = lerp(control, end, t);
+		return lerp(a, b, t);
+	}
+
+	/** Samples a scalar cubic Bézier curve. **/
+	public static inline function cubicBezier(start:Float, controlA:Float, controlB:Float, end:Float, t:Float):Float
+	{
+		final a = lerp(start, controlA, t);
+		final b = lerp(controlA, controlB, t);
+		final c = lerp(controlB, end, t);
+		final d = lerp(a, b, t);
+		final e = lerp(b, c, t);
+		return lerp(d, e, t);
+	}
+
+	/**
+		Used to smoothdamp rotations. To move between positions, instead use smoothdampXY.
+
+		@param a starting angle
+		@param b target angle
+		@param v velocity object
+		@param t smooth time
+		@param d delta time
+		@param s max speed
+	**/
+	public static inline function smoothdampAngle(a:Float, b:Float, v:{velocity:Float}, t:Float, d:Float, s:Float = M.FLOAT_MAX)
+	{
+		final diff = M.wrap(b - a, -M.PI, M.PI);
+		b = a + diff;
+
+		final ob = b;
+		t = M.max(0.0001, t);
+
+		final o = 2 / t;
+		final x = o * d;
+		final exp = 1 / (1 + x + 0.48 * x * x + 0.235 * x * x * x);
+
+		var c = a - b;
+		var m = s * t;
+
+		c = M.clamp(c, -m, m);
+		b = a - c;
+
+		final tmp = (v.velocity + o * c) * d;
+		v.velocity = (v.velocity - o * tmp) * exp;
+
+		var out = b + (c + tmp) * exp;
+
+		if ((ob - a > 0) == (out > ob))
+		{
+			out = ob;
+			v.velocity = 0;
+		}
+
+		return M.wrap(out, -M.PI, M.PI);
+	}
+
+	/**
+		@param a starting value
+		@param b target value
+		@param v velocity object
+		@param t smooth time
+		@param d delta time
+		@param s max speed
+	**/
+	public static inline function smoothdamp(a:Float, b:Float, v:{velocity:Float}, t:Float, d:Float, s:Float = M.FLOAT_MAX)
+	{
+		t = M.max(0.0001, t);
+
+		final o = 2.0 / t;
+		final x = o * d;
+		final exp = 1 / (1 + x + 0.48 * x * x + 0.235 * x * x * x);
+
+		var c = a - b;
+		var ob = b;
+
+		final mc = s * t;
+		c = M.clamp(c, -mc, mc);
+		b = a - c;
+
+		final tmp = (v.velocity + o * c) * d;
+		v.velocity = (v.velocity - o * tmp) * exp;
+
+		var out = b + (c + tmp) * exp;
+
+		// prevent overshoot
+		if ((ob - a > 0) == (out > ob))
+		{
+			out = ob;
+			v.velocity = 0;
+		}
+
+		return out;
+	}
+
+	/**
+		Smoothdamp for objects.
+
+		@param cur current object position
+		@param b target object position
+		@param v velocity object 
+		@param t smooth time
+		@param d delta time
+		@param s max speed
+	**/
+	public static inline function smoothdamp2D(cur:XY, tar:XY, v:XY, t:Float, d:Float, s:Float):XY
+	{
+		t = M.max(0.0001, t);
+
+		final o = 2.0 / t;
+		final x = o * d;
+		final exp = 1 / (1 + x + 0.48 * x * x + 0.235 * x * x * x);
+
+		final otx = tar.x;
+		final oty = tar.y;
+
+		var cx = cur.x - tar.x;
+		var cy = cur.y - tar.y;
+
+		final maxChange = s * t;
+		final changeSqr = cx * cx + cy * cy;
+		final maxChangeSqr = maxChange * maxChange;
+
+		if (changeSqr > maxChangeSqr)
+		{
+			final scale = maxChange / M.sqrt(changeSqr);
+			cx *= scale;
+			cy *= scale;
+		}
+
+		final adjTarX = cur.x - cx;
+		final adjTarY = cur.y - cy;
+
+		final tmpX = (v.x + o * cx) * d;
+		final tmpY = (v.y + o * cy) * d;
+
+		v.x = (v.x - o * tmpX) * exp;
+		v.y = (v.y - o * tmpY) * exp;
+
+		var outx = adjTarX + (cx + tmpX) * exp;
+		var outy = adjTarY + (cy + tmpY) * exp;
+
+		final tardx = otx - cur.x;
+		final tardy = oty - cur.y;
+		final outdx = outx - otx;
+		final outdy = outy - oty;
+
+		if (tardx * outdx + tardy * outdy > 0)
+		{
+			outx = otx;
+			outy = oty;
+			v.x = 0;
+			v.y = 0;
+		}
+
+		return {
+			x: outx,
+			y: outy,
+		}
+	}
+}
+
+private typedef XY =
+{
+	x:Float,
+	y:Float,
 }
