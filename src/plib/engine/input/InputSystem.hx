@@ -3,7 +3,7 @@ package plib.engine.input;
 import haxe.ds.IntMap;
 import haxe.ds.ObjectMap;
 import plib.engine.input.InputConfig.InputBinding;
-import plib.engine.input.InputConfig.PadButton as PB;
+import plib.engine.input.InputConfig.PadButton as PButton;
 import plib.engine.input.InputConfig.PadStick;
 import plib.engine.input.InputProfile.InputConflictPolicy;
 import plib.engine.input.InputSession.InputSessionOptions;
@@ -51,14 +51,14 @@ interface InputPad
 	public var connected(get, never):Bool;
 	public var deadzone(get, set):Float;
 
-	public function buttonDown(button:PadButton):Bool;
-	public function buttonPressed(button:PadButton):Bool;
-	public function buttonReleased(button:PadButton):Bool;
+	public function buttonDown(button:PButton):Bool;
+	public function buttonPressed(button:PButton):Bool;
+	public function buttonReleased(button:PButton):Bool;
 	public function stickX(stick:PadStick):Float;
 	public function stickY(stick:PadStick):Float;
 }
 
-/** Heaps pad adapter kept private because games work with logical `PadButton`s. **/
+/** Heaps pad adapter kept private because games work with logical `PButton`s. **/
 private class HxdInputPad implements InputPad
 {
 	private final pad:hxd.Pad;
@@ -69,22 +69,22 @@ private class HxdInputPad implements InputPad
 		this.pad = pad;
 		buttonMap = [];
 		var config = pad.config;
-		buttonMap[PB.A] = config.A;
-		buttonMap[PB.B] = config.B;
-		buttonMap[PB.X] = config.X;
-		buttonMap[PB.Y] = config.Y;
-		buttonMap[PB.LB] = config.LB;
-		buttonMap[PB.RB] = config.RB;
-		buttonMap[PB.LT] = config.LT;
-		buttonMap[PB.RT] = config.RT;
-		buttonMap[PB.Start] = config.start;
-		buttonMap[PB.Select] = config.back;
-		buttonMap[PB.DpadUp] = config.dpadUp;
-		buttonMap[PB.DpadDown] = config.dpadDown;
-		buttonMap[PB.DpadLeft] = config.dpadLeft;
-		buttonMap[PB.DpadRight] = config.dpadRight;
-		buttonMap[PB.LeftStick] = config.analogClick;
-		buttonMap[PB.RightStick] = config.ranalogClick;
+		buttonMap[PButton.A] = config.A;
+		buttonMap[PButton.B] = config.B;
+		buttonMap[PButton.X] = config.X;
+		buttonMap[PButton.Y] = config.Y;
+		buttonMap[PButton.LB] = config.LB;
+		buttonMap[PButton.RB] = config.RB;
+		buttonMap[PButton.LT] = config.LT;
+		buttonMap[PButton.RT] = config.RT;
+		buttonMap[PButton.Start] = config.start;
+		buttonMap[PButton.Select] = config.back;
+		buttonMap[PButton.DpadUp] = config.dpadUp;
+		buttonMap[PButton.DpadDown] = config.dpadDown;
+		buttonMap[PButton.DpadLeft] = config.dpadLeft;
+		buttonMap[PButton.DpadRight] = config.dpadRight;
+		buttonMap[PButton.LeftStick] = config.analogClick;
+		buttonMap[PButton.RightStick] = config.ranalogClick;
 	}
 
 	public var id(get, never):Int;
@@ -110,16 +110,16 @@ private class HxdInputPad implements InputPad
 	private inline function set_deadzone(value:Float):Float
 		return pad.axisDeadZone = value;
 
-	private inline function physical(button:PadButton):Int
+	private inline function physical(button:PButton):Int
 		return buttonMap[button];
 
-	public inline function buttonDown(button:PadButton):Bool
+	public inline function buttonDown(button:PButton):Bool
 		return pad.isDown(physical(button));
 
-	public inline function buttonPressed(button:PadButton):Bool
+	public inline function buttonPressed(button:PButton):Bool
 		return pad.isPressed(physical(button));
 
-	public inline function buttonReleased(button:PadButton):Bool
+	public inline function buttonReleased(button:PButton):Bool
 		return pad.isReleased(physical(button));
 
 	public inline function stickX(stick:PadStick):Float
@@ -511,7 +511,7 @@ class InputSystem extends Node
 			for (pad in backend.pads())
 				for (button in 0...plib.engine.input.InputConfig.PadButton.COUNT)
 				{
-					var logical:PadButton = cast button;
+					var logical:PButton = cast button;
 					if (!pad.buttonPressed(logical) || !isRegisteredControllerButton(logical))
 						continue;
 					onActivity.dispatch({
@@ -533,7 +533,7 @@ class InputSystem extends Node
 		return false;
 	}
 
-	private function isRegisteredControllerButton(button:PadButton):Bool
+	private function isRegisteredControllerButton(button:PButton):Bool
 	{
 		var binding:InputBinding = InputBinding.PadButton(button);
 		for (action in config.controller.actionIterator())
