@@ -318,7 +318,7 @@ class Node
 	}
 
 	/** Reports whether this node or any ancestor is paused. **/
-	public inline function isPausedInTree():Bool
+	public function isPausedInTree():Bool
 	{
 		var current:Null<Node> = this;
 		while (current != null)
