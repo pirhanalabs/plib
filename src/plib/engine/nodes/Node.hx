@@ -3,6 +3,8 @@ package plib.engine.nodes;
 import plib.engine.Application;
 import plib.engine.input.InputSystem;
 import plib.engine.nodes.LayerNode.ViewportMetrics;
+import plib.types.Signal.SignalSubscription;
+import plib.types.Signal;
 
 enum NodeState
 {
@@ -40,6 +42,8 @@ class Node
 	@:allow(plib.engine.nodes.NodeTree)
 	private final children:Array<Node>;
 
+	private var subscriptions:Array<SignalSubscription>;
+
 	/** Creates a detached, reusable node; attach it with `parent.add(node)`. **/
 	public function new()
 	{
@@ -54,6 +58,32 @@ class Node
 		postupdateMode = Enabled;
 
 		children = [];
+		subscriptions = [];
+	}
+
+	// ---- Signals ----
+
+	public function listenTo<T>(signal:Signal<T>, listener:T->Void)
+	{
+		if (state != Active)
+		{
+			throw 'Cannot register a listener while this node is inactive.';
+		}
+
+		var sub = signal.listen(listener);
+		subscriptions.push(sub);
+		return sub;
+	}
+
+	@:allow(plib.engine.nodes.NodeTree)
+	private function clearSubscriptions()
+	{
+		var pending = subscriptions;
+		subscriptions = [];
+		for (sub in pending)
+		{
+			sub.dispose();
+		}
 	}
 
 	// ---- Hierarchy Access ----
@@ -266,6 +296,7 @@ class Node
 			node.parent = null;
 			node.tree = null;
 
+			node.clearSubscriptions();
 			node.onDestroyed();
 			node.children.resize(0);
 		}

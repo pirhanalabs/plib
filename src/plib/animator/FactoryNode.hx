@@ -17,7 +17,9 @@ private abstract class TreeNode extends AnimatorNode
 	}
 }
 
-/** Fluent base for queue and group animation composition. **/
+/** 
+	Base for queue and group animation. 
+**/
 @:noCompletion
 abstract class FactoryNode extends TreeNode
 {
@@ -26,36 +28,51 @@ abstract class FactoryNode extends TreeNode
 		super(parent);
 	}
 
-	/** Adds a sequential child factory. **/
+	/** 
+		Creates a queued factory node. Children will
+		trigger in order.
+	**/
 	public function queue():QueueNode
 	{
 		return new QueueNode(this);
 	}
 
-	/** Adds a parallel child factory. **/
+	/** 
+		Creates a parallel factory node. Children will
+		trigger all at the same time.
+	**/
 	public function group():GroupNode
 	{
 		return new GroupNode(this);
 	}
 
-	/** Adds a duration-based callback animation. **/
+	/** 
+		Adds a callback animation node. 
+	**/
 	public function anim<T>(seconds:Float, target:T, callback:(target:T, ratio:Float) -> Void):AnimatorNode
 	{
 		return add(new AnimationNode(seconds, target, callback));
 	}
 
-	/** Adds a delay that produces no postupdate callback. **/
+	/** 
+		Adds a delay. 
+	**/
 	public function wait(seconds:Float):AnimatorNode
 	{
 		return add(new WaitNode(seconds));
 	}
 
-	/** Adds an immediate action that does not consume a frame. **/
+	/** 
+		Adds an immediate action that does not consume a frame. 
+	**/
 	public function fn(callback:Void->Void):AnimatorNode
 	{
 		return add(new FnNode(callback));
 	}
 
+	/**
+		Adds an animator node to this factory.
+	**/
 	public function add<T:AnimatorNode>(node:T):T
 	{
 		if (isPrepared())
@@ -72,20 +89,17 @@ abstract class FactoryNode extends TreeNode
 		return node;
 	}
 
-	public function cancel(node:AnimatorNode):Bool
-	{
-		if (isPrepared())
-			throw 'Cannot remove children from a running animator factory.';
-
-		var childIndex = children.indexOf(node);
-		if (childIndex < 0)
-			return false;
-
-		children.splice(childIndex, 1);
-		node.parent = null;
-		onChildRemoved(node, childIndex);
-		return true;
-	}
-
-	private function onChildRemoved(node:AnimatorNode, childIndex:Int) {}
+	// public function cancel(node:AnimatorNode):Bool
+	// {
+	// 	if (isPrepared())
+	// 		throw 'Cannot remove children from a running animator factory.';
+	// 	var childIndex = children.indexOf(node);
+	// 	if (childIndex < 0)
+	// 		return false;
+	// 	children.splice(childIndex, 1);
+	// 	node.parent = null;
+	// 	onChildRemoved(node, childIndex);
+	// 	return true;
+	// }
+	// private function onChildRemoved(node:AnimatorNode, childIndex:Int) {}
 }

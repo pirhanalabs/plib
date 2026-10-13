@@ -1,12 +1,13 @@
 package plib.animator;
 
-/** Zero-duration timeline action that runs as soon as its parent prepares it. **/
 class FnNode extends AnimatorNode
 {
 	private final callback:Void->Void;
 	private var invoked:Bool = false;
 
-	/** Wraps one non-null callback; it does not consume an animation frame. **/
+	/** 
+		Wraps one non-null callback. It does not consume an animation frame. 
+	**/
 	public function new(callback:Void->Void)
 	{
 		if (callback == null)
@@ -20,7 +21,6 @@ class FnNode extends AnimatorNode
 		callback();
 	}
 
-	/** Reports whether the callback has run. **/
 	public function completed():Bool
 		return invoked;
 }

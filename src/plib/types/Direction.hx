@@ -9,6 +9,9 @@ package plib.types;
 **/
 enum abstract Direction(Int)
 {
+	public static final D4:Array<Direction> = [Top, Left, Right, Bottom];
+	public static final D8:Array<Direction> = [TopLeft, Top, TopRight, Left, Right, BottomLeft, Bottom, BottomRight];
+
 	var TopLeft = 0;
 	var Top = 1;
 	var TopRight = 2;

@@ -8,82 +8,138 @@ import plib.engine.nodes.LayersGroupNode;
 import plib.engine.nodes.NodeTree.RootNode;
 import plib.engine.nodes.NodeTree;
 import plib.engine.nodes.ScreenManager;
-import plib.engine.save.SaveSystem;
 import plib.engine.save.SaveSystem.SaveBackend;
 import plib.engine.save.SaveSystem.SettingsStore;
+import plib.engine.save.SaveSystem;
 
-/** Standard plib/Heaps bootstrap owning timing, input, persistence, tree, layers, and screens. **/
+/**
+	Application entry point.
+
+	The plib framework works using a node tree hierarchy inspired by Godot.
+
+	The project architecture should use nodes when things need updating or
+	the graphical hierarchy, like screens, objects, systems, etc.
+
+	To start a new project, extend this class. Creating a new application
+	instance requires to give a viewport width, viewport height, and set the integerScaling mode.
+	You may also give a save id, which the save system will use.
+
+	Add new NodeScreen using the `screens` manager. 
+	The common methods are `push(screen)`, `pop()`, `replace(screen)` and `change(screen)`.
+	Push adds a screen to the top of the stack, pop removes the top screen of the stack, replace does both at
+	once, and change removes all previous screens and sets the new one.
+**/
 class Application extends hxd.App
 {
+	// ---- static instance ----
 	private static var instance:Application;
 
-	/**
-		Static instance getter.
-	**/
 	public static function get()
 	{
 		return instance;
 	}
 
-	private final referenceWidth:Int;
-	private final referenceHeight:Int;
-	private final initialIntegerScaling:Bool;
-	private final saveId:String;
-
-	/** Automatically created logical root, tree, and presentation layers. **/
+	/**
+		Top node of the tree hierarchy. This should
+		rarely ever be used for general purpose uses.
+	**/
 	public var root(default, null):RootNode;
 
+	/**
+		Manages the node hierarchy rooted at `root`.
+		Runs callbacks and handle node lifecycle.
+
+		Changes requested during updates are queued and processed
+		after them.
+	**/
 	public var tree(default, null):NodeTree;
+
+	/**
+		Contains and manage the screen layers and how they are handled.
+		Each layer have its own viewport property that can be
+		independantly changed. This contains the `hudLayer`, `worldLayer` and `windowLayer`.
+	**/
 	public var layers(default, null):LayersGroupNode;
-	public var world(get, never):LayerNode;
-	public var hud(get, never):LayerNode;
+
+	public var hudLayer(get, never):LayerNode;
+	public var worldLayer(get, never):LayerNode;
 	public var windowLayer(get, never):LayerNode;
 
-	/** Default main screen stack mounted in the fitted content layer. **/
+	/** 
+		Default main screen stack mounted in the fitted content layer. 
+	**/
 	public var screens(default, null):ScreenManager;
 
-	/** Modal stack mounted in the HUD overlay. **/
+	/** 
+		Modal stack mounted in the HUD overlay. 
+	**/
 	public var modals(default, null):ScreenManager;
 
-	/** Application-owned input sampler and local player/session facade. **/
+	/** 
+		Application-owned input sampler and local player/session facade. 
+	**/
 	public var inputs(default, null):InputSystem;
-	/** Persistent game saves and the standard preferences store. **/
+
+	/** 
+		Persistent game save data. Handles sys and js. 
+	**/
 	public var saves(default, null):SaveSystem;
+
+	/**
+		Player preference store.
+	**/
 	public var settings(default, null):SettingsStore;
 
-	/** window api **/
+	/** 
+		Reference to the window api.
+	**/
 	public var window(default, null):Window;
 
-	/** frame information **/
+	/** 
+		Frame information, like tmod, dt, elapsed, frames.
+	**/
 	public var frame(default, null):Frame;
 
-	/** Creates the app with a logical world resolution and stable optional persistence namespace. **/
-	public function new(referenceWidth:Int, referenceHeight:Int, integerScaling:Bool, ?saveId:String)
+	/** 
+		Creates the app with a viewport resolution and stable optional persistence namespace. 
+	**/
+	public function new(viewportWid:Int, viewportHei:Int, integerScaling:Bool, ?saveId:String)
 	{
 		if (instance != null)
 			throw 'Only one Application instance can exist.';
-		if (referenceWidth <= 0 || referenceHeight <= 0)
+		if (viewportWid <= 0 || viewportHei <= 0)
 			throw 'Application reference dimensions must be positive.';
 
 		super();
 		instance = this;
-		this.referenceWidth = referenceWidth;
-		this.referenceHeight = referenceHeight;
-		this.initialIntegerScaling = integerScaling;
-		this.saveId = saveId == null ? defaultSaveId() : saveId;
+
+		this.layers = new LayersGroupNode(viewportWid, viewportHei, integerScaling);
+
+		var sid = makeSaveId(saveId);
+		this.saves = new SaveSystem(sid, createSaveBackend(sid));
 	}
 
-	override function init()
+	/**
+		Utility function to create a save id name.
+	**/
+	private inline function makeSaveId(id:Null<String>)
+	{
+		return id == null ? defaultSaveId() : id;
+	}
+
+	/**
+		Initialize everything necessary for the application to function.
+	**/
+	override final function init()
 	{
 		super.init();
 
 		window = hxd.Window.getInstance();
 		frame = new Frame();
-		saves = new SaveSystem(saveId, createSaveBackend(saveId));
 		settings = new SettingsStore(saves);
 		root = new RootNode();
 		inputs = root.add(InputSystem.createForHeaps(window));
-		layers = root.add(new LayersGroupNode(referenceWidth, referenceHeight, initialIntegerScaling));
+		root.add(layers);
 		screens = layers.world.content.add(createScreenManager());
 		modals = layers.hud.overlay.add(createScreenManager());
 		modals.blocks(screens);
@@ -103,34 +159,49 @@ class Application extends hxd.App
 		haxe.Timer.delay(ready, 1);
 	}
 
-	private inline function get_world():LayerNode
+	private inline function get_worldLayer():LayerNode
 		return layers.world;
 
-	private inline function get_hud():LayerNode
+	private inline function get_hudLayer():LayerNode
 		return layers.hud;
 
 	private inline function get_windowLayer():LayerNode
 		return layers.window;
 
-	/** Factory hook used for the application's primary and modal screen stacks. **/
+	/** 
+		Factory hook used for the application's primary and modal screen stacks. 
+	**/
 	private function createScreenManager():ScreenManager
 	{
 		return new ScreenManager();
 	}
 
-	/** Override for Steam Cloud, console storage, or another project-specific backend. **/
+	/** 
+		Override for Steam Cloud, console storage, or another project-specific backend. 
+	**/
 	private function createSaveBackend(id:String):SaveBackend
 	{
 		return SaveSystem.createDefaultBackend(id);
 	}
 
+	/**
+		Override this to change the default save id, although
+		you can simply give a save id name to the application directly
+		in the constructor.
+	**/
 	private function defaultSaveId():String
 	{
 		var name = Type.getClassName(Type.getClass(this));
-		if (name == null) return 'plib-game';
+		if (name == null)
+			return 'plib-game';
 		return ~/[^A-Za-z0-9._-]/g.replace(name, '-');
 	}
 
+	/**
+		Initializes the heaps engine properly
+		and fixes the sound bug. Nothing of this should
+		be changed or skipped if overridden.
+	**/
 	private function initializeEngine()
 	{
 		engine.backgroundColor = 0x000000;
@@ -146,8 +217,16 @@ class Application extends hxd.App
 		#end
 	}
 
+	/**
+		Override this to add behavior once every
+		part of the application is ready. this triggers
+		after `loadAssets` and 'init`.
+	**/
 	private function ready() {}
 
+	/**
+		Handles the crash errors.
+	**/
 	#if hl
 	private function onCrash(error:Dynamic)
 	{
@@ -180,16 +259,20 @@ class Application extends hxd.App
 
 	// ---- helpers ----
 
-	/** Selects empty viewport margins or solid physical-window bands. **/
+	/** 
+		Selects empty viewport margins or solid physical-window bands. 
+	**/
 	public inline function setBorderMode(mode:ViewportBorderMode)
 	{
 		layers.setBorderMode(mode);
 	}
 
-	/** Enables or disables integer fitting and reapplies presentation layout. **/
+	/** 
+		Enables or disables integer fitting and reapplies presentation layout. 
+	**/
 	public function setIntegerScaling(enabled:Bool)
 	{
-		world.setIntegerScaling(enabled);
+		worldLayer.setIntegerScaling(enabled);
 	}
 
 	/**

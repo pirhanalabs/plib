@@ -2,7 +2,6 @@ package plib.animator;
 
 import plib.engine.Frame;
 
-/** Calls `callback(target, ratio)` during postupdate until ratio reaches one. **/
 class AnimationNode<T> extends AnimatorNode
 {
 	private final target:T;
@@ -11,11 +10,15 @@ class AnimationNode<T> extends AnimatorNode
 	private var elapsed:Float = 0;
 	private var done:Bool = false;
 
-	/** Creates a timed animation; zero seconds invokes ratio `1` during preparation. **/
+	/** 
+		Creates a timed animation.
+
+		Calls `callback(target, ratio)` during postupdate until `seconds` have passed. 
+		If seconds is 0 or below, the callback will be called once with a ratio of 1 without
+		taking a frame.
+	**/
 	public function new(seconds:Float, target:T, callback:(target:T, ratio:Float) -> Void)
 	{
-		if (seconds < 0)
-			throw 'Animation duration cannot be negative.';
 		this.seconds = seconds;
 		this.target = target;
 		this.callback = callback;
@@ -23,7 +26,7 @@ class AnimationNode<T> extends AnimatorNode
 
 	override function prepare()
 	{
-		if (seconds == 0)
+		if (seconds <= 0)
 		{
 			done = true;
 			callback(target, 1);

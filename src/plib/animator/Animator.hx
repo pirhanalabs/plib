@@ -3,7 +3,9 @@ package plib.animator;
 import plib.collections.Queue;
 import plib.engine.Frame;
 
-/** Schedules concurrent and serial root animation timelines. **/
+/** 
+	Schedules animations.
+**/
 class Animator
 {
 	private final async:Array<AnimatorNode>;
@@ -13,8 +15,10 @@ class Animator
 	private final pendingQueued:Array<AnimatorNode>;
 	private final cancelled:Map<AnimatorNode, Bool>;
 	private final completionCallbacks:Map<AnimatorNode, () -> Void>;
-	private var asyncPaused:Bool;
-	private var queuedPaused:Bool;
+
+	public var asyncPaused(default, null):Bool;
+	public var queuedPaused(default, null):Bool;
+
 	private var asyncRanThisFrame:Bool;
 	private var queuedRanThisFrame:Bool;
 	private var queuedNodeThisFrame:Null<AnimatorNode>;
@@ -22,7 +26,11 @@ class Animator
 	private var disposed:Bool;
 	private final queuedCapacity:Int;
 
-	/** Creates an animator; `queuedCapacity` bounds pending root timelines. **/
+	/** 
+		Creates an animator.
+
+		Queued capacity affects queued only. Async animations are not bound.
+	**/
 	public function new(queuedCapacity:Int = 64)
 	{
 		if (queuedCapacity <= 0)
@@ -45,45 +53,59 @@ class Animator
 		this.queuedCapacity = queuedCapacity;
 	}
 
-	/** Pauses concurrent roots without changing their elapsed time. **/
+	/** 
+		Pauses concurrent animations without changing their elapsed time. 
+	**/
 	public function pauseAsync()
 	{
 		asyncPaused = true;
 	}
 
-	/** Pauses the serial root line without changing its elapsed time. **/
+	/** 
+		Pauses queued animations without changing their elapsed time. 
+	**/
 	public function pauseQueued()
 	{
 		queuedPaused = true;
 	}
 
-	/** Pauses both root lines. **/
-	public function pauseAll()
+	/** 
+		Pauses concurrent and queued animations, without changing their elapsed time. 
+	**/
+	public inline function pauseAll()
 	{
 		pauseAsync();
 		pauseQueued();
 	}
 
-	/** Resumes concurrent roots. **/
+	/** 
+		Resumes concurrent animations only.
+	**/
 	public function resumeAsync()
 	{
 		asyncPaused = false;
 	}
 
-	/** Resumes the serial root line. **/
+	/** 
+		Resumes queued animations only. 
+	**/
 	public function resumeQueued()
 	{
 		queuedPaused = false;
 	}
 
-	/** Resumes both root lines. **/
-	public function resumeAll()
+	/** 
+		Resumes both concurrent and queued animations.
+	**/
+	public inline function resumeAll()
 	{
 		resumeAsync();
 		resumeQueued();
 	}
 
-	/** Cancels all concurrent roots without firing completion callbacks. **/
+	/** 
+		Cancels all concurrent animations without firing callbacks. 
+	**/
 	public function clearAsync()
 	{
 		for (node in async)
@@ -100,7 +122,9 @@ class Animator
 		}
 	}
 
-	/** Cancels all serial roots without firing completion callbacks. **/
+	/** 
+		Cancels all queued animations without firing callbacks. 
+	**/
 	public function clearQueued()
 	{
 		while (queued.any())
@@ -118,60 +142,66 @@ class Animator
 			cancelled.clear();
 	}
 
-	/** Cancels every scheduled root without firing completion callbacks. **/
-	public function clearAll()
+	/** 
+		Cancels all animations without firing completion callbacks. 
+	**/
+	public inline function clearAll()
 	{
 		clearAsync();
 		clearQueued();
 	}
 
-	/** Returns whether this animator has permanently released its work. **/
+	/** 
+		Returns true if this animator has been disposed. 
+	**/
 	public inline function isDisposed():Bool
 	{
 		return disposed;
 	}
 
-	/** Returns whether concurrent roots are paused. **/
-	public inline function isAsyncPaused():Bool
-	{
-		return asyncPaused;
-	}
-
-	/** Returns whether the serial root line is paused. **/
-	public inline function isQueuedPaused():Bool
-	{
-		return queuedPaused;
-	}
-
-	/** Returns whether any concurrent roots are scheduled. **/
+	/** 
+		Returns whether any concurrent animations are scheduled. 
+	**/
 	public inline function hasAsync():Bool
 	{
 		return getAsyncCount() > 0;
 	}
 
-	/** Returns whether any serial roots are scheduled. **/
+	/** 
+		Returns whether any queued animations are scheduled. 
+	**/
 	public inline function hasQueued():Bool
 	{
 		return getQueuedCount() > 0;
 	}
 
-	/** Returns whether either root line contains work. **/
+	/** 
+		Returns whether any animations are scheduled. 
+	**/
 	public inline function hasAnimations():Bool
 	{
 		return hasAsync() || hasQueued();
 	}
 
-	/** Returns the number of active and pending concurrent roots. **/
+	/** 
+		Returns the number of active and pending concurrent animations. 
+	**/
 	public inline function getAsyncCount():Int
 	{
 		var count = pendingAsync.length;
 		for (node in async)
+		{
 			if (!cancelled.exists(node))
+			{
 				count++;
+			}
+		}
 		return count;
 	}
 
-	/** Returns the number of active and pending serial roots. **/
+	/** 
+		Returns the number of active and pending queued animations. 
+	**/
 	public inline function getQueuedCount():Int
 	{
 		return queued.getCount() + pendingQueued.length;
@@ -185,11 +215,17 @@ class Animator
 		ensureAlive();
 		var node = new QueueNode(null);
 		if (processingFrame)
+		{
 			pendingAsync.push(node);
+		}
 		else
+		{
 			async.push(node);
+		}
 		if (onComplete != null)
+		{
 			completionCallbacks.set(node, onComplete);
+		}
 		return node;
 	}
 
@@ -212,7 +248,9 @@ class Animator
 		return node;
 	}
 
-	/** Cancels a root timeline without invoking its completion callback. **/
+	/** 
+		Cancels an animation timeline without invoking its completion callback. 
+	**/
 	public function cancel(node:QueueNode):Bool
 	{
 		var pendingIndex = pendingAsync.indexOf(node);
@@ -248,14 +286,18 @@ class Animator
 			cancelled.set(node, true);
 			completionCallbacks.remove(node);
 			if (!processingFrame)
+			{
 				cancelled.remove(node);
+			}
 			return true;
 		}
 
 		return false;
 	}
 
-	/** Advances both lines. Must be followed by exactly one `postupdate()`. **/
+	/** 
+		Update all animations. 
+	**/
 	public function update(frame:Frame)
 	{
 		if (disposed)
@@ -266,111 +308,121 @@ class Animator
 		processingFrame = true;
 		try
 		{
+			asyncRanThisFrame = !asyncPaused;
+			queuedRanThisFrame = !queuedPaused;
+			queuedNodeThisFrame = null;
 
-		asyncRanThisFrame = !asyncPaused;
-		queuedRanThisFrame = !queuedPaused;
-		queuedNodeThisFrame = null;
-
-		if (asyncRanThisFrame)
-		{
-			asyncFrame.resize(0);
-			for (node in async)
-				if (!cancelled.exists(node))
-					asyncFrame.push(node);
-
-			for (node in asyncFrame)
+			if (asyncRanThisFrame)
 			{
-				if (cancelled.exists(node))
-					continue;
+				asyncFrame.resize(0);
+				for (node in async)
+					if (!cancelled.exists(node))
+						asyncFrame.push(node);
 
-				var began = node.ensurePrepared();
-				if (node.completed())
+				for (node in asyncFrame)
 				{
-					completeRoot(node);
-					continue;
-				}
+					if (cancelled.exists(node))
+						continue;
 
-				// A newly activated tree receives its initial postupdate before
-				// accumulating time. Actions may still finish during prepare().
-				if (!began)
-					node.update(frame);
-			}
-		}
-		else
-			asyncFrame.resize(0);
+					var began = node.ensurePrepared();
+					if (node.completed())
+					{
+						completeRoot(node);
+						continue;
+					}
 
-		if (queuedRanThisFrame)
-		{
-			var node = queued.peek();
-			while (node != null && node.completed())
-			{
-				queued.dequeue();
-				notifyCompleted(node);
-				node = queued.peek();
-			}
-
-			if (node != null)
-			{
-				var began = node.ensurePrepared();
-				if (node.completed())
-				{
-					queued.dequeue();
-					completeRoot(node);
-				}
-				else
-				{
-					queuedNodeThisFrame = node;
+					// A newly activated tree receives its initial postupdate before
+					// accumulating time. Actions may still finish during prepare().
 					if (!began)
 						node.update(frame);
 				}
 			}
-		}
-		}
-		catch (error:Dynamic)
-		{
-			finishFrame();
-			throw error;
-		}
-	}
+			else
+				asyncFrame.resize(0);
 
-	/** Applies this frame's callbacks and commits deferred root mutations. **/
-	public function postupdate()
-	{
-		if (disposed)
-			return;
-		if (!processingFrame)
-			throw 'Animator.postupdate() called without update().';
-		try
-		{
-
-		if (asyncRanThisFrame)
-		{
-			for (node in asyncFrame)
+			if (queuedRanThisFrame)
 			{
-				if (cancelled.exists(node))
-					continue;
-
-				node.postupdate();
-				if (node.completed())
-					completeRoot(node);
-			}
-		}
-
-		if (queuedRanThisFrame)
-		{
-			var node = queuedNodeThisFrame;
-			if (node != null && !cancelled.exists(node) && queued.peek() == node)
-			{
-				node.postupdate();
-				if (node.completed() && queued.peek() == node)
+				var node = queued.peek();
+				while (node != null && node.completed())
 				{
 					queued.dequeue();
-					completeRoot(node);
+					notifyCompleted(node);
+					node = queued.peek();
+				}
+
+				if (node != null)
+				{
+					var began = node.ensurePrepared();
+					if (node.completed())
+					{
+						queued.dequeue();
+						completeRoot(node);
+					}
+					else
+					{
+						queuedNodeThisFrame = node;
+						if (!began)
+							node.update(frame);
+					}
 				}
 			}
 		}
+		catch (error:Dynamic)
+		{
+			finishFrame();
+			throw error;
+		}
+	}
 
-		finishFrame();
+	/** 
+		Postupdate all animations.
+	**/
+	public function postupdate()
+	{
+		if (disposed)
+		{
+			return;
+		}
+
+		if (!processingFrame)
+		{
+			throw 'Animator.postupdate() called without update().';
+		}
+
+		try
+		{
+			if (asyncRanThisFrame)
+			{
+				for (node in asyncFrame)
+				{
+					if (cancelled.exists(node))
+					{
+						continue;
+					}
+
+					node.postupdate();
+					if (node.completed())
+					{
+						completeRoot(node);
+					}
+				}
+			}
+
+			if (queuedRanThisFrame)
+			{
+				var node = queuedNodeThisFrame;
+				if (node != null && !cancelled.exists(node) && queued.peek() == node)
+				{
+					node.postupdate();
+					if (node.completed() && queued.peek() == node)
+					{
+						queued.dequeue();
+						completeRoot(node);
+					}
+				}
+			}
+
+			finishFrame();
 		}
 		catch (error:Dynamic)
 		{
@@ -379,7 +431,9 @@ class Animator
 		}
 	}
 
-	/** Cancels all work and permanently prevents new timeline creation. **/
+	/** 
+		Cancels all work and permanently prevents new timeline creation. 
+	**/
 	public function dispose()
 	{
 		if (disposed)
@@ -434,12 +488,18 @@ class Animator
 	{
 		compactAsync();
 
+		// async
 		for (node in pendingAsync)
+		{
 			async.push(node);
+		}
 		pendingAsync.resize(0);
 
+		// queued
 		for (node in pendingQueued)
+		{
 			queued.enqueue(node);
+		}
 		pendingQueued.resize(0);
 
 		cancelled.clear();

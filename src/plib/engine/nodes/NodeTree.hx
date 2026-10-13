@@ -5,11 +5,15 @@ import plib.engine.Application;
 import plib.engine.nodes.Node.NodeState;
 import plib.engine.nodes.Node.ProcessMode;
 
-/** Permanent root created by `Application` and owned by one `NodeTree`. **/
+/** 
+	Permanent root created by `Application` and owned by one `NodeTree`. 
+**/
 class RootNode extends Node
 {
 	public function new()
+	{
 		super();
+	}
 
 	override function remove():Bool
 	{
@@ -45,28 +49,44 @@ private class NodeMutationQueue
 	public function new() {}
 
 	public function add(parent:Node, child:Node)
+	{
 		commands.push(Add(parent, child));
+	}
 
 	public function remove(node:Node)
+	{
 		commands.push(Remove(node));
+	}
 
 	public function reparent(node:Node, parent:Node)
+	{
 		commands.push(Reparent(node, parent));
+	}
 
 	public function destroy(node:Node)
+	{
 		commands.push(Destroy(node));
+	}
 
 	public function flush(apply:NodeCommand->Void, onError:(NodeCommand, Dynamic) -> Void)
 	{
 		if (commands.length == 0)
+		{
 			return;
+		}
+
 		var pending = commands.copy();
 		commands.resize(0);
+
 		var firstError:Dynamic = null;
 		var failed = false;
+
 		for (command in pending)
+		{
 			try
-				apply(command)
+			{
+				apply(command);
+			}
 			catch (error)
 			{
 				if (!failed)
@@ -76,8 +96,11 @@ private class NodeMutationQueue
 				}
 				onError(command, error);
 			}
+		}
 		if (failed)
+		{
 			throw firstError;
+		}
 	}
 }
 
@@ -90,9 +113,13 @@ private class NodeServiceRegistry
 	public function register<T:Node>(tree:NodeTree, key:ServiceKey<T>, node:T)
 	{
 		if (node.tree != tree || node.state != Active)
+		{
 			throw 'Only active nodes can be registered as services.';
+		}
 		if (values.get(key) == node)
+		{
 			throw 'Service already registered: ${key.name}';
+		}
 		values.set(key, node);
 	}
 
@@ -100,18 +127,24 @@ private class NodeServiceRegistry
 	{
 		var current = values.get(key);
 		if (current == null || (expected != null && current != expected))
+		{
 			return false;
+		}
 		return values.remove(key);
 	}
 
 	public function get<T:Node>(key:ServiceKey<T>):T
+	{
 		return cast values.get(key);
+	}
 
 	public function require<T:Node>(key:ServiceKey<T>):T
 	{
 		var value = get(key);
 		if (value == null)
+		{
 			throw 'Required service is not registered: ${key.name}';
+		}
 		return value;
 	}
 
@@ -119,17 +152,29 @@ private class NodeServiceRegistry
 	{
 		var removed = new ObjectMap<Node, Bool>();
 		for (node in nodes)
+		{
 			removed.set(node, true);
+		}
+
 		var keys:Array<Dynamic> = [];
 		for (key => node in values)
+		{
 			if (removed.exists(node))
+			{
 				keys.push(key);
+			}
+		}
+
 		for (key in keys)
+		{
 			values.remove(key);
+		}
 	}
 
 	public function clear()
+	{
 		values.clear();
+	}
 }
 
 private typedef TraversalItem =
@@ -159,35 +204,52 @@ private class NodeTraversalCache
 	public function new() {}
 
 	public function invalidate()
+	{
 		dirty = true;
+	}
 
 	public function isDirty():Bool
+	{
 		return dirty;
+	}
 
 	public function rebuild(root:Node)
 	{
 		entries.resize(0);
 		var stack:Array<TraversalItem> = [{node: root, depth: 0}];
 		var open:Array<Int> = [];
+
 		while (stack.length > 0)
 		{
 			var item = stack.pop();
+
 			while (open.length > 0)
 			{
 				var index = open[open.length - 1];
 				if (entries[index].depth < item.depth)
+				{
 					break;
+				}
+
 				entries[index].subtreeEnd = entries.length;
 				open.pop();
 			}
+
 			open.push(entries.length);
 			entries.push(new NodeTraversalEntry(item.node, item.depth));
 			var child = item.node.getChildCount() - 1;
+
 			while (child >= 0)
+			{
 				stack.push({node: item.node.getChild(child--), depth: item.depth + 1});
+			}
 		}
+
 		for (index in open)
+		{
 			entries[index].subtreeEnd = entries.length;
+		}
+
 		dirty = false;
 	}
 
@@ -198,33 +260,41 @@ private class NodeTraversalCache
 		{
 			var entry = entries[index];
 			var node = entry.node;
+
 			if (node.tree != tree || node.state != Active || node.paused)
 			{
 				index = entry.subtreeEnd;
 				continue;
 			}
+
 			switch getMode(node)
 			{
 				case SkipSubtree:
 					index = entry.subtreeEnd;
 					continue;
+
 				case SkipSelf:
 					index++;
 					continue;
+
 				case Enabled:
 					callback(node);
 			}
+
 			if (node.tree != tree || node.state != Active || node.paused || getMode(node) == SkipSubtree)
+			{
 				index = entry.subtreeEnd;
+			}
 			else
+			{
 				index++;
+			}
 		}
 	}
 }
 
 private typedef StoredQuery = NodeQuery<Node>;
 
-/** Tree-private sparse index of live queries by scope. **/
 @:noCompletion
 @:access(plib.engine.nodes.NodeQuery)
 private class NodeQueryRegistry
@@ -254,12 +324,16 @@ private class NodeQueryRegistry
 		}
 		scoped.push(stored);
 		try
-			query.rebuild()
+		{
+			query.rebuild();
+		}
 		catch (error)
 		{
 			scoped.remove(stored);
 			if (scoped.length == 0)
+			{
 				byScope.remove(scope);
+			}
 			query.rollbackRegistration();
 			throw error;
 		}
@@ -293,29 +367,44 @@ private class NodeQueryRegistry
 		visitAncestors(parent, query ->
 		{
 			if (!query.removeNodes(nodes))
+			{
 				return;
+			}
 			if (batching)
+			{
 				pendingCompaction.set(query, true);
+			}
 			else
+			{
 				query.compactRemovedNodes();
+			}
 		});
 	}
 
 	public function beginMutationBatch()
 	{
 		if (batching)
+		{
 			throw 'Node query mutation batches cannot be nested.';
+		}
 		batching = true;
 	}
 
 	public function endMutationBatch()
 	{
 		if (!batching)
+		{
 			return;
+		}
+
 		batching = false;
 		for (query => _ in pendingCompaction)
+		{
 			if (query.active)
+			{
 				query.compactRemovedNodes();
+			}
+		}
 		pendingCompaction.clear();
 	}
 
@@ -325,14 +414,20 @@ private class NodeQueryRegistry
 		{
 			var scoped = byScope.get(node);
 			if (scoped == null)
+			{
 				continue;
+			}
+
 			for (query in scoped)
 			{
 				if (dirty.remove(query))
+				{
 					dirtyCount--;
+				}
 				pendingCompaction.remove(query);
 				query.deactivate();
 			}
+
 			byScope.remove(node);
 		}
 	}
@@ -340,18 +435,31 @@ private class NodeQueryRegistry
 	public function rebuildDirty()
 	{
 		if (dirtyCount == 0)
+		{
 			return;
+		}
+
 		pending.resize(0);
+
 		for (query => _ in dirty)
+		{
 			pending.push(query);
+		}
+
 		dirty.clear();
 		dirtyCount = 0;
+
 		var firstError:Dynamic = null;
 		var failed = false;
+
 		for (query in pending)
+		{
 			if (query.active)
+			{
 				try
-					query.rebuild()
+				{
+					query.rebuild();
+				}
 				catch (error)
 				{
 					if (!failed)
@@ -360,8 +468,13 @@ private class NodeQueryRegistry
 						firstError = error;
 					}
 				}
+			}
+		}
+
 		if (failed)
+		{
 			throw firstError;
+		}
 	}
 
 	private function visitAncestors(node:Null<Node>, callback:StoredQuery->Void)
@@ -391,7 +504,9 @@ private class NodeQueryRegistry
 	}
 }
 
-/** Owns, traverses, and safely mutates one hierarchy of nodes. **/
+/** 
+	Owns, traverses, and safely mutates one hierarchy of nodes. 
+**/
 class NodeTree
 {
 	public final root:RootNode;
@@ -577,38 +692,15 @@ class NodeTree
 			return;
 
 		flushingDeferred = true;
-
-		var firstError:Dynamic = null;
-		var hasError = false;
 		var index = 0;
 
 		while (index < deferred.length)
 		{
-			var callback = deferred[index++];
-
-			try
-			{
-				callback();
-			}
-			catch (error)
-			{
-				if (!hasError)
-				{
-					firstError = error;
-					hasError = true;
-				}
-
-				reportError('deferred-callback', error);
-			}
+			deferred[index++]();
 		}
 
 		deferred.resize(0);
 		flushingDeferred = false;
-
-		if (hasError)
-		{
-			throw firstError;
-		}
 	}
 
 	// ---- Processing ----
@@ -619,77 +711,24 @@ class NodeTree
 			throw 'NodeTree.process() cannot be called recursively.';
 
 		if (traversal.isDirty())
+		{
 			traversal.rebuild(root);
+		}
 
+		// processing
 		processing = true;
-
-		var processError:Dynamic = null;
-		var hasProcessError:Bool = false;
-
-		try
-		{
-			traversal.run(this, node -> node.preupdateMode, node -> node.preupdate());
-			traversal.run(this, node -> node.updateMode, node -> node.update(frame));
-			traversal.run(this, node -> node.postupdateMode, node -> node.postupdate());
-		}
-		catch (error)
-		{
-			hasProcessError = true;
-			processError = error;
-			reportError('process', error);
-		}
-
+		traversal.run(this, node -> node.preupdateMode, node -> node.preupdate());
+		traversal.run(this, node -> node.updateMode, node -> node.update(frame));
+		traversal.run(this, node -> node.postupdateMode, node -> node.postupdate());
 		processing = false;
 
-		var commitError:Dynamic = null;
-		var hasCommitError:Bool = false;
-
+		// mutations
 		queries.beginMutationBatch();
-		try
-		{
-			mutations.flush(applyCommand, (command, error) -> reportError('mutation', error));
-		}
-		catch (error)
-		{
-			hasCommitError = true;
-			commitError = error;
-		}
+		mutations.flush(applyCommand, (command, error) -> reportError('mutation', error));
 		queries.endMutationBatch();
+		queries.rebuildDirty();
 
-		var queryError:Dynamic = null;
-		var hasQueryError:Bool = false;
-		try
-		{
-			queries.rebuildDirty();
-		}
-		catch (error)
-		{
-			hasQueryError = true;
-			queryError = error;
-			reportError('query-rebuild', error);
-		}
-
-		var deferredError:Dynamic = null;
-		var hasDeferredError:Bool = false;
-
-		try
-		{
-			flushDeferred();
-		}
-		catch (error)
-		{
-			hasDeferredError = true;
-			deferredError = error;
-		}
-
-		if (hasProcessError)
-			throw processError;
-		if (hasCommitError)
-			throw commitError;
-		if (hasQueryError)
-			throw queryError;
-		if (hasDeferredError)
-			throw deferredError;
+		flushDeferred();
 	}
 
 	private function applyCommand(command:NodeCommand)
@@ -723,39 +762,65 @@ class NodeTree
 	private function validateAdd(parent:Node, child:Node)
 	{
 		if (parent == null || child == null)
+		{
 			throw 'Parent and child are required.';
+		}
 		if (parent.tree != this || parent.state != Active)
+		{
 			throw 'Parent must be active in this tree.';
+		}
 		if (child == parent)
+		{
 			throw 'A node cannot be its own child.';
+		}
 		if (child.parent != null)
+		{
 			throw 'Child already has a parent.';
+		}
 		if (child.tree != null)
+		{
 			throw 'Child already belongs to a NodeTree.';
+		}
 		if (child.state != Detached)
+		{
 			throw 'Only detached nodes can be added.';
+		}
 		if (child.isAncestorOf(parent))
+		{
 			throw 'Adding this node would create a hierarchy cycle.';
+		}
 
 		for (node in child.collectSubtree())
 		{
 			if (node.tree != null)
+			{
 				throw 'Added subtree contains an attached node.';
+			}
 			if (node.state != Detached)
+			{
 				throw 'Added subtree contains a non-detached node.';
+			}
 		}
 	}
 
 	private function validateReparent(node:Node, newParent:Node)
 	{
 		if (node == null || newParent == null)
+		{
 			throw 'Node and new parent are required.';
+		}
 		if (node.tree != this || node.state != Active)
+		{
 			throw 'Node must be active in this tree';
+		}
 		if (newParent.tree != this || newParent.state != Active)
+		{
 			throw 'New parent must be active in this tree.';
+		}
 		if (node == newParent || node.isAncestorOf(newParent))
+		{
 			throw 'Reparenting would create a cycle.';
+		}
 	}
 
 	// ---- Mutation implementation ----
@@ -812,7 +877,11 @@ class NodeTree
 		// Removed hooks execute bottom-up while tree references remain valid.
 		var index = subtree.length - 1;
 		while (index >= 0)
-			subtree[index--].onRemovedFromTree();
+		{
+			var current = subtree[index--];
+			current.clearSubscriptions();
+			current.onRemovedFromTree();
+		}
 
 		queries.removeScopes(subtree);
 		services.unregisterNodes(subtree);
@@ -868,14 +937,18 @@ class NodeTree
 	private function applyDestroy(node:Node)
 	{
 		if (node.tree != this)
+		{
 			return;
+		}
 
 		var subtree = node.collectSubtree();
 		var oldParent = node.parent;
 		queries.removeSubtreeFromAncestors(oldParent, subtree);
 
 		if (oldParent != null)
+		{
 			@:privateAccess oldParent.children.remove(node);
+		}
 
 		services.unregisterNodes(subtree);
 		queries.removeScopes(subtree);
@@ -885,6 +958,7 @@ class NodeTree
 		{
 			var current = subtree[index--];
 
+			current.clearSubscriptions();
 			current.onRemovedFromTree();
 			@:privateAccess current.tree = null;
 			@:privateAccess current.parent = null;
@@ -913,7 +987,9 @@ class NodeTree
 	private function refreshViewportMetricsFor(root:Node)
 	{
 		if (root != null && root.tree == this)
+		{
 			refreshViewportMetrics(root.collectSubtree());
+		}
 	}
 
 	/** Refreshes presentation context and resize callbacks for the active tree. **/
@@ -924,17 +1000,25 @@ class NodeTree
 			defer(resize);
 			return;
 		}
+
 		var subtree = root.collectSubtree();
 		refreshViewportMetrics(subtree);
+
 		for (node in subtree)
+		{
 			if (node.tree == this && node.state == Active)
+			{
 				node.onResize();
+			}
+		}
 	}
 
 	private function markSubtree(root:Node, state:NodeState)
 	{
 		for (node in root.collectSubtree())
+		{
 			@:privateAccess node.state = state;
+		}
 	}
 
 	private inline function restoreDetachedState(root:Node)

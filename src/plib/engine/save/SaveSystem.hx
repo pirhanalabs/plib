@@ -1,6 +1,8 @@
 package plib.engine.save;
 
-/** Result of reading raw data from a storage backend. **/
+/** 
+	Result of reading raw data from a storage backend. 
+**/
 enum SaveBackendRead
 {
 	Found(data:String);
@@ -8,37 +10,84 @@ enum SaveBackendRead
 	Failed(message:String);
 }
 
-/** Result of a backend mutation. **/
+/** 
+	Result of a backend mutation. 
+**/
 enum SaveBackendWrite
 {
 	Success;
 	Failed(message:String);
 }
 
-/** Platform storage boundary. Projects may implement this for Steam or consoles. **/
+/** 
+	Platform storage boundary. Projects may implement this for Steam or consoles. 
+**/
 interface SaveBackend
 {
-	/** Reads the opaque key and completes exactly once with data, absence, or an error. **/
+	/** 
+		Reads the opaque key and completes exactly once with data, absence, or an error. 
+	**/
 	public function read(key:String, complete:SaveBackendRead->Void):Void;
 
-	/** Replaces a key safely and preserves its old value as `key + ".backup"` when possible. **/
+	/** 
+		Replaces a key safely and preserves its old value as `key + ".backup"` when possible. 
+	**/
 	public function writeAtomic(key:String, data:String, complete:SaveBackendWrite->Void):Void;
 
-	/** Deletes both the primary key and backend-managed recovery data. **/
+	/** 
+		Deletes both the primary key and backend-managed recovery data. 
+	**/
 	public function delete(key:String, complete:SaveBackendWrite->Void):Void;
 }
 
-/** Converts game-owned save data to and from JSON-compatible values. **/
+/** 
+	Converts game-owned save data to and from JSON-compatible values. 
+**/
 interface SaveCodec<T>
 {
-	/** Converts typed game state into JSON-compatible primitives, arrays, and objects. **/
+	/** 
+		Converts typed game state into JSON-compatible primitives, arrays, and objects. 
+	**/
 	public function encode(value:T):Dynamic;
 
-	/** Validates and reconstructs typed game state from a decoded JSON value. **/
+	/** 
+		Validates and reconstructs typed game state from a decoded JSON value. 
+	**/
 	public function decode(value:Dynamic):T;
 }
 
-/** Definition of one independently versioned collection of save slots. **/
+/**
+	Codec for small save formats that do not need a dedicated class.
+	The encode function returns JSON-compatible data. The decode function must
+	validate that data and reconstruct T, throwing when it is invalid.
+	Errors are handled by SaveStore just like errors from other codecs.
+**/
+class BasicSaveCodec<T> implements SaveCodec<T>
+{
+	private final encoder:T->Dynamic;
+	private final decoder:Dynamic->T;
+
+	/** Creates a codec from encoding and validating decoding functions. **/
+	public function new(encode:T->Dynamic, decode:Dynamic->T)
+	{
+		if (encode == null || decode == null)
+			throw 'Save codecs require encode and decode functions.';
+		encoder = encode;
+		decoder = decode;
+	}
+
+	/** Converts typed state to JSON-compatible values using the supplied encoder. **/
+	public inline function encode(value:T):Dynamic
+		return encoder(value);
+
+	/** Validates and reconstructs typed state using the supplied decoder. **/
+	public inline function decode(value:Dynamic):T
+		return decoder(value);
+}
+
+/** 
+	Definition of one independently versioned collection of save slots. 
+**/
 typedef SaveDefinition<T> =
 {
 	var id:String;
@@ -47,32 +96,43 @@ typedef SaveDefinition<T> =
 	@:optional var migrate:(data:Dynamic, fromVersion:Int) -> Dynamic;
 }
 
-/** User-facing load outcome. **/
+/** 
+	User-facing load outcome. 
+**/
 enum SaveLoadResult<T>
 {
 	Loaded(value:T, recoveredFromBackup:Bool);
 	Missing;
+	UnsupportedVersion(savedVersion:Int, supportedVersion:Int);
 	Corrupt(message:String);
 	Failed(message:String);
 }
 
-/** User-facing save and delete outcome. **/
+/** 
+	User-facing save and delete outcome. 
+**/
 enum SaveWriteResult
 {
 	Success;
 	Failed(message:String);
 }
 
-/** Read-only result-bearing operation that also supports asynchronous backends. **/
+/** 
+	Read-only result-bearing operation that also supports asynchronous backends. 
+**/
 class SaveTask<T>
 {
-	/** Completed result, or `null` while an asynchronous backend is pending. Prefer `onComplete`. **/
+	/** 
+		Completed result, or `null` while an asynchronous backend is pending. Prefer `onComplete`. 
+	**/
 	public var result(default, null):Null<T>;
 
 	private var completeState:Bool;
 	private final callbacks:Array<T->Void>;
 
-	/** Creates a pending result task; normally returned by a save operation. **/
+	/** 
+		Creates a pending result task; normally returned by a save operation. 
+	**/
 	public function new()
 	{
 		result = null;
@@ -80,11 +140,15 @@ class SaveTask<T>
 		callbacks = [];
 	}
 
-	/** Reports whether a result has been produced. **/
+	/** 
+		Reports whether a result has been produced. 
+	**/
 	public inline function isComplete():Bool
 		return completeState;
 
-	/** Observes the result once; runs immediately when the task already completed. **/
+	/** 
+		Observes the result once; runs immediately when the task already completed. 
+	**/
 	public function onComplete(callback:T->Void):SaveTask<T>
 	{
 		if (callback == null)
@@ -118,7 +182,9 @@ private typedef SaveEnvelope =
 	var payload:Dynamic;
 }
 
-/** Typed slot facade returned by `SaveSystem.define`. **/
+/** 
+	Typed slot facade returned by `SaveSystem.define`. 
+**/
 class SaveStore<T>
 {
 	private static inline final FILE_HEADER = 'PLIB-SAVE-1';
@@ -133,7 +199,9 @@ class SaveStore<T>
 		this.definition = definition;
 	}
 
-	/** Encodes and atomically writes `value` to a non-negative numbered slot. **/
+	/** 
+		Encodes and atomically writes `value` to a numbered slot. 
+	**/
 	public function save(slot:Int, value:T):SaveTask<SaveWriteResult>
 	{
 		if (slot < 0)
@@ -175,7 +243,9 @@ class SaveStore<T>
 		return task;
 	}
 
-	/** Loads, verifies, migrates, and decodes a slot, falling back to its backup. **/
+	/** 
+		Loads, verifies, migrates, and decodes a slot, falling back to its backup. 
+	**/
 	public function load(slot:Int):SaveTask<SaveLoadResult<T>>
 	{
 		if (slot < 0)
@@ -210,14 +280,16 @@ class SaveStore<T>
 			var envelope:SaveEnvelope = cast haxe.Json.parse(decodeFile(encoded));
 			if (envelope == null || envelope.format != definition.id)
 				return Corrupt('Save format does not match ${definition.id}.');
-			if (envelope.version <= 0 || envelope.version > definition.version)
-				return Corrupt('Unsupported save version: ${envelope.version}.');
+			if (!Std.isOfType(envelope.version, Int) || envelope.version <= 0)
+				return Corrupt('Save version must be a positive integer.');
+			if (envelope.version > definition.version)
+				return UnsupportedVersion(envelope.version, definition.version);
 
 			var payload = envelope.payload;
 			if (envelope.version < definition.version)
 			{
 				if (definition.migrate == null)
-					return Corrupt('Save version ${envelope.version} requires a migration to ${definition.version}.');
+					return UnsupportedVersion(envelope.version, definition.version);
 				payload = definition.migrate(payload, envelope.version);
 			}
 			return Loaded(definition.codec.decode(payload), backup);
@@ -228,13 +300,17 @@ class SaveStore<T>
 		}
 	}
 
-	/** Wraps JSON in a small text envelope without Base64 or binary expansion. **/
+	/** 
+		Wraps JSON in a small text envelope without Base64 or binary expansion. 
+	**/
 	private static function encodeFile(json:String):String
 	{
 		return FILE_HEADER + '\n' + haxe.crypto.Sha256.encode(json) + '\n' + json;
 	}
 
-	/** Validates the exact stored JSON before parsing or invoking game codecs. **/
+	/** 
+		Validates the exact stored JSON before parsing or invoking game codecs. 
+	**/
 	private static function decodeFile(encoded:String):String
 	{
 		if (encoded == null)
@@ -254,7 +330,9 @@ class SaveStore<T>
 		return json;
 	}
 
-	/** Permanently removes a slot and its backup. **/
+	/** 
+		Permanently removes a slot and its backup. 
+	**/
 	public function delete(slot:Int):SaveTask<SaveWriteResult>
 	{
 		if (slot < 0)
@@ -272,17 +350,186 @@ class SaveStore<T>
 		return definition.id + '/slot-' + slot;
 }
 
-/** Application-owned save facade with automatic target backend selection. **/
+/** 
+	Application-owned save facade with automatic target backend selection. 
+
+	Usage:
+
+	1. Define the data you want to save in a typedef.
+	```
+	typedef GameSave = {
+		var level:Int;
+		var coins:Int;
+	}
+	```
+	2. Write a codec to explain how to encode that data and how to recognize valid saved data.
+	```
+	class MyCodec implements plib.engine.save.SaveSystem.SaveCodec<GameSave>{
+		public function new(){}
+
+		public function encode(value:GameSave):Dynamic{
+			return {
+				level: value.level,
+				coins: value.coins
+			}	
+		}
+
+		public function decode(value:Dynamic):GameSave{
+			// do data validation here
+			return {
+				level:value.level,
+				coins: value.coins
+			}	
+		}
+	}
+	```
+
+	3. Register a SaveStore somewhere in your application.
+
+	```
+	public var progress:plib.engine.save.SaveSystem.SaveStore<GameSave>
+	```
+
+	then initialize it in your application's `ready()` method:
+
+	```
+	progress = saves.define({
+		id: "progress",
+		version: 1,
+		codec: new MyCodec()
+	});
+	```
+
+	`"progress"` identifies this data family. You can define others as you want,
+	each with its own slots and version. Register each id only once. `"settings"`
+	is already reserved by `Application`.
+
+	4. Save to a slot. Each save store has its own slots. Slot are integers that can
+	represent anything you decide. 
+
+	```
+	progress.save(0, {
+		level: 3,
+		coins: 120,
+	}).onComplete(result -> {
+		switch(result){
+			case Success:
+				trace("game saved.");
+			case Failed(message):
+				trace("Save failed: " + message);
+		}
+	});
+	```
+
+	Saving to an existing slot replaces it and preserves the previous value as a backup
+	when possible.
+
+	5. Load a slot
+
+	```
+	progress.load(0).onComplete(result -> {
+		switch(result){
+			case Loaded(data, recovered):
+				// apply the values to your game here.
+				trace('Data loaded');
+			case Missing:
+				// Start a new game
+				trace('No save exists.');
+			case Corrupt(message):
+				trace('Save data is invalid: $message');
+			case UnsupportedVersion(savedVersion, supportedVersion):
+				trace('Save version $savedVersion cannot be loaded by version $supportedVersion.');
+			case Failed(message):
+				trace('Storage could not be read: $message');
+		}
+	});
+	```
+
+	Loading returns data. It does not automatically restore your player, scenes, or other objects.
+
+	##Settings##
+
+	`app.settings` is a premade key/value store, so you don't need a codec.
+
+	```
+	var app = Application.get();
+
+	// Load before reading preferences
+	app.settings.load().onComplete(result -> {
+		// handle your loaded settings here
+		var volume = app.settings.get("musicVolume", 1.0);
+	});
+
+	// change a setting in memory only
+	app.settings.set("musicVolume", 0.7);
+
+	// persist the current settings
+	app.settings.save().onComplete(result->{
+		switch(result){
+			case Success:
+				trace("Settings Saved!");
+			case Failed(message):
+				trace("Oops! " + message);
+		}
+	});
+	```
+
+	When your save format changes, you can add a migration for older payloads.
+
+	```
+	progress = saves.define({
+		id:'progress',
+		version: 2,
+		codec: new MyCodec(),
+		migrate: (data, fromVersion)->{
+			if (fromVersion == 1){
+				data.lives = 3;	
+			}
+
+			return data;
+		}
+	});
+	```
+
+	Finally, you can use a basic codec for simplicity instead of creating a new one:
+
+	```
+	progress = saves.define({
+		id:"progress",
+		version: 1,
+		codec: new plib.engine.save.SaveSystem.BasicSaveCodec<GameSave>(
+			(value:GameSave)->{
+				// encode here
+				return {
+					level: value.level,
+					coins: value.coins,
+				};
+			},
+			(data:Dynamic)->{
+				// decode here
+				return {
+					level: data.level,
+					coins: data.coins,
+				}
+			}
+		);
+	});
+	```
+
+	Storage is automatic. Browser builds use `localStorage`, native builds use files.
+
+
+**/
 class SaveSystem
 {
 	public final id:String;
-
-	/** Active storage implementation; expose chiefly for diagnostics and platform integration. **/
 	public final backend:SaveBackend;
 
 	private final stores:Map<String, Dynamic>;
 
-	/** Creates a namespaced save facade using a caller-supplied backend. **/
+	/** 
+		Creates a namespaced save facade using a caller-supplied backend. 
+	**/
 	public function new(id:String, backend:SaveBackend)
 	{
 		validateId(id, 'Save application');
@@ -293,13 +540,17 @@ class SaveSystem
 		stores = [];
 	}
 
-	/** Creates a system using browser storage on JS and files on native targets. **/
+	/** 
+		Creates a system using browser storage on JS and files on native targets. 
+	**/
 	public static function createDefault(id:String):SaveSystem
 	{
 		return new SaveSystem(id, createDefaultBackend(id));
 	}
 
-	/** Selects the standard platform backend. Override this boundary for platform services. **/
+	/** 
+		Selects the standard platform backend. 
+	**/
 	public static function createDefaultBackend(id:String):SaveBackend
 	{
 		validateId(id, 'Save application');
@@ -312,13 +563,17 @@ class SaveSystem
 		#end
 	}
 
-	/** Creates isolated in-memory storage for tests and tools. **/
+	/** 
+		Creates isolated in-memory storage for tests and tools. 
+	**/
 	public static function memory(id:String = 'test'):SaveSystem
 	{
 		return new SaveSystem(id, new MemorySaveBackend());
 	}
 
-	/** Registers one stable, versioned data family and returns its typed slot interface. **/
+	/** 
+		Registers one stable, versioned data family and returns its typed slot interface. 
+	**/
 	public function define<T>(definition:SaveDefinition<T>):SaveStore<T>
 	{
 		if (definition == null || definition.codec == null)
@@ -340,20 +595,26 @@ class SaveSystem
 	}
 }
 
-/** Small persisted key/value store for framework and game preferences. **/
+/** 
+	Small persisted key/value store for framework and game preferences. 
+**/
 class SettingsStore
 {
 	private final store:SaveStore<Dynamic>;
 	private var values:Dynamic;
 
-	/** Reserves the `settings` definition and stores all preferences in slot zero. **/
+	/** 
+		Reserves the `settings` definition and stores all preferences in slot zero. 
+	**/
 	public function new(system:SaveSystem)
 	{
 		values = {};
 		store = system.define({id: 'settings', version: 1, codec: new SettingsCodec()});
 	}
 
-	/** Loads settings and replaces the current in-memory values when data exists. **/
+	/** 
+		Loads settings and replaces the current in-memory values when data exists. 
+	**/
 	public function load():SaveTask<SaveLoadResult<Dynamic>>
 	{
 		var task = store.load(0);
@@ -365,30 +626,42 @@ class SettingsStore
 		return task;
 	}
 
-	/** Persists the current key/value snapshot. **/
+	/** 
+		Persists the current key/value snapshot. 
+	**/
 	public inline function save():SaveTask<SaveWriteResult>
 		return store.save(0, values);
 
-	/** Returns a typed value or `fallback` when the key is absent. **/
+	/** 
+		Returns a typed value or `fallback` when the key is absent. 
+	**/
 	public inline function get<T>(key:String, fallback:T):T
 		return Reflect.hasField(values, key) ? cast Reflect.field(values, key) : fallback;
 
-	/** Reports whether a preference exists in memory. **/
+	/** 
+		Reports whether a preference exists in memory. 
+	**/
 	public inline function has(key:String):Bool
 		return Reflect.hasField(values, key);
 
-	/** Changes an in-memory preference and returns the assigned value; call `save` to persist it. **/
+	/** 
+		Changes an in-memory preference and returns the assigned value. Call `save` to persist it. 
+	**/
 	public inline function set<T>(key:String, value:T):T
 	{
 		Reflect.setField(values, key, value);
 		return value;
 	}
 
-	/** Removes an in-memory preference; call `save` to persist the removal. **/
+	/** 
+		Removes an in-memory preference. Call `save` to persist the removal. 
+	**/
 	public inline function remove(key:String):Bool
 		return Reflect.deleteField(values, key);
 
-	/** Clears in-memory preferences without writing storage. **/
+	/** 
+		Clears in-memory preferences without writing storage. 
+	**/
 	public function clear()
 		values = {};
 }
@@ -408,7 +681,9 @@ private class SettingsCodec implements SaveCodec<Dynamic>
 	}
 }
 
-/** In-memory backend intended for deterministic tests and tools. **/
+/** 
+	In-memory backend intended for deterministic tests and tools. 
+**/
 class MemorySaveBackend implements SaveBackend
 {
 	public final values:Map<String, String> = [];

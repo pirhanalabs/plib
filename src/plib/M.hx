@@ -55,49 +55,65 @@ class M
 		return Std.int(v > 0 ? v + 0.5 : v < 0 ? v - 0.5 : 0);
 	}
 
-	/** Clamps a value between min and max. **/
+	/** 
+		Clamps a value between min and max. 
+	**/
 	public static inline function clamp<T:Float>(val:T, min:T, max:T):T
 	{
 		return val < min ? min : val > max ? max : val;
 	}
 
-	/** Returns the smallest value between a and b. **/
+	/** 
+		Returns the smallest value between a and b. 
+	**/
 	public static inline function min<T:Float>(a:T, b:T):T
 	{
 		return a < b ? a : b;
 	}
 
-	/** Returns the biggest value between a and b. **/
+	/** 
+		Returns the biggest value between a and b. 
+	**/
 	public static inline function max<T:Float>(a:T, b:T):T
 	{
 		return a < b ? b : a;
 	}
 
-	/** Returns the absolute value of a number. **/
+	/** 
+		Returns the absolute value of a number. 
+	**/
 	public static inline function abs<T:Float>(v:T):T
 	{
 		return v < 0 ? -v : v;
 	}
 
-	/** Returns the square value of a number. **/
+	/** 
+		Returns the square value of a number. 
+	**/
 	public static inline function square<T:Float>(v:T):T
 	{
 		return v * v;
 	}
 
-	/** Returns the cube value of a number. **/
+	/** 
+		Returns the cube value of a number. 
+	**/
 	public static inline function cube<T:Float>(v:T):T
 	{
 		return square(square(v));
 	}
 
-	/** pow for floating point exponents. **/
+	/** 
+		Pow for floating point exponents. 
+	**/
 	public static inline function pow(v:Float, e:Float):Float
 	{
 		return Math.pow(v, e);
 	}
 
-	/** efficient pow for integer exponents. **/
+	/** 
+		Efficient pow for integer exponents. 
+	**/
 	public static function ipow(v:Float, e:Int):Float
 	{
 		if (e == 0)
@@ -143,7 +159,9 @@ class M
 		return result;
 	}
 
-	/** Returns the distance between two points. **/
+	/** 
+		Returns the distance between two points. 
+	**/
 	public static inline function dist(x1:Float, y1:Float, x2:Float, y2:Float):Float
 	{
 		var dx = x2 - x1;
@@ -151,7 +169,9 @@ class M
 		return Math.sqrt((dx * dx) + (dy * dy));
 	}
 
-	/** Returns the squared distance between two points. **/
+	/** 
+		Returns the squared distance between two points. 
+	**/
 	public static inline function distsq(x1:Float, y1:Float, x2:Float, y2:Float):Float
 	{
 		var dx = x2 - x1;
@@ -159,31 +179,41 @@ class M
 		return (dx * dx) + (dy * dy);
 	}
 
-	/** Returns true if [x2, y2] is within distance of [x1, y1]. **/
+	/** 
+		Returns true if [x2, y2] is within distance of [x1, y1]. 
+	**/
 	public static inline function inrange(x1:Float, y1:Float, x2:Float, y2:Float, distance:Float):Bool
 	{
 		return distsq(x1, y1, x2, y2) < (distance * distance);
 	}
 
-	/** Returns true if v is between min and max. **/
+	/** 
+		Returns true if v is between min and max. 
+	**/
 	public static inline function between(v:Float, min:Float, max:Float):Bool
 	{
 		return v >= min && v <= max;
 	}
 
-	/** Returns the sign of v. **/
+	/** 
+		Returns the sign of v. 
+	**/
 	public static inline function sign(v:Float):Int
 	{
 		return v < 0 ? -1 : v > 0 ? 1 : 0;
 	}
 
-	/** Returns true if a and b have the same sign. **/
+	/** 
+		Returns true if a and b have the same sign. 
+	**/
 	public static inline function eqsign(a:Float, b:Float):Bool
 	{
 		return a * b >= 0.0;
 	}
 
-	/** Rounds a float to the given precision. **/
+	/** 
+		Rounds a float to the given precision. 
+	**/
 	public static inline function pretty(x:Float, precision:Int = 0):Float
 	{
 		if (precision == 0)
@@ -192,61 +222,81 @@ class M
 		return round(x * d) / d;
 	}
 
-	/** Returns true if v is even. **/
+	/** 
+		Returns true if v is even. 
+	**/
 	public static inline function even(v:Int)
 	{
 		return (v & 1) == 0;
 	}
 
-	/** Returns the decimals of a given float, always positive. **/
+	/** 
+		Returns the decimals of a given float, always positive. 
+	**/
 	public static inline function positiveDecimals(v:Float):Float
 	{
 		return abs(v - Std.int(v));
 	}
 
-	/** Returns the square root of v. **/
+	/** 
+		Returns the square root of v. 
+	**/
 	public static inline function sqrt(v:Float):Float
 	{
 		return Math.sqrt(v);
 	}
 
-	/** Returns the quake-style inverse square root of v. **/
+	/** 
+		Returns the quake-style inverse square root of v. 
+	**/
 	public static inline function invsqrt(v:Float):Float
 	{
 		return 1 / sqrt(v);
 	}
 
-	/** compare two numbers using epsilon. **/
+	/** 
+		Compare two numbers using epsilon. 
+	**/
 	public static inline function compare(a:Float, b:Float, eps:Float):Bool
 	{
 		return compareZero(a - b, eps);
 	}
 
-	/** compare a number against zero using an epsilon. **/
+	/** 
+		Compare a number against zero using an epsilon. 
+	**/
 	public static inline function compareZero(v:Float, eps:Float):Bool
 	{
 		return v > 0 ? v < eps : -v < eps;
 	}
 
-	/** Converts the boolean expression to an integer.**/
+	/** 
+		Converts the boolean expression to an integer.
+	**/
 	public static inline function bool(v:Bool):Int
 	{
 		return v ? 1 : 0;
 	}
 
-	/** Sets a bit. **/
+	/** 
+		Sets a bit. 
+	**/
 	public static inline function setBit(v:Int, bit:Int)
 	{
 		return v | (1 << bit);
 	}
 
-	/** Unsets a bit. **/
+	/** 
+		Unsets a bit. 
+	**/
 	public static inline function unsetBit(v:Int, bit:Int)
 	{
 		return v & ~(1 << bit);
 	}
 
-	/** Returns true if the integer has the given bit. **/
+	/** 
+		Returns true if the integer has the given bit. 
+	**/
 	public static inline function hasBit(v:Int, bit:Int)
 	{
 		return v & (1 << bit) != 0;
@@ -277,6 +327,9 @@ class M
 		return v;
 	}
 
+	/**
+		Shuffles an array.
+	**/
 	public static inline function shuffle<T>(a:Array<T>)
 	{
 		hxd.Math.shuffle(a);
@@ -287,8 +340,10 @@ class M
 		return Math.sin(v);
 	}
 
-	/** Sin, but from [0-1] **/
-	public static inline function sinNormalized(a:Float)
+	/** 
+		Sin, but from [0-1] 
+	**/
+	public static inline function sinNorm(a:Float)
 	{
 		return (1 + sin(a)) * 0.5;
 	}
@@ -298,8 +353,10 @@ class M
 		return Math.cos(v);
 	}
 
-	/** Cos, but from [0-1] **/
-	public static inline function cosNormalized(a:Float)
+	/** 
+		Cos, but from [0-1] 
+	**/
+	public static inline function cosNorm(a:Float)
 	{
 		return (1 + cos(a)) * 0.5;
 	}
@@ -397,5 +454,13 @@ class M
 	public static inline function imod(v:Int, m:Int):Int
 	{
 		return ((v % m) + m) % m;
+	}
+
+	/**
+		Utility to place elements on a line from the center.
+	**/
+	public static function layout(item_size:Float, num_items:Int, pos:Int)
+	{
+		return (-item_size * (num_items - 1) * 0.5) + (item_size * pos);
 	}
 }

@@ -2,14 +2,16 @@ package plib.animator;
 
 import plib.engine.Frame;
 
-/** Base class for a single-use unit of animation work. **/
+/** 
+	Base class for any animation work. 
+**/
 abstract class AnimatorNode
 {
 	private var parent:Null<FactoryNode> = null;
 	private var prepared:Bool = false;
 
 	/**
-		Begins this node exactly once. Returns true when preparation happened
+		Prepare this node. Returns true when preparation happened
 		during this call.
 	**/
 	public final function ensurePrepared():Bool

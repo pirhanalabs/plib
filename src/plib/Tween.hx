@@ -3,19 +3,25 @@ package plib;
 /** Allocation-free interpolation helpers used by animations and camera motion. **/
 class Tween
 {
-	/** Linearly interpolates without clamping `t`. **/
+	/** 
+		Linearly interpolates without clamping `t`. 
+	**/
 	public static inline function lerp(a:Float, b:Float, t:Float):Float
 	{
 		return a * (1 - t) + b * t;
 	}
 
-	/** Applies frame-rate-independent exponential interpolation toward `b`. **/
+	/** 
+		Applies frame-rate-independent exponential interpolation toward `b`. 
+	**/
 	public static inline function lerpdt(a:Float, b:Float, t:Float, dt:Float):Float
 	{
 		return lerp(a, b, M.min(t * dt, 1));
 	}
 
-	/** Linearly interpolates with `t` clamped to `[0, 1]`. **/
+	/** 
+		Linearly interpolates with `t` clamped to `[0, 1]`. 
+	**/
 	public static inline function lerpClamped(a:Float, b:Float, t:Float):Float
 	{
 		return lerp(a, b, M.clamp(t, 0, 1));

@@ -125,6 +125,38 @@ class PlayerInputState
 	private var elapsed:Float = 0;
 	private var handledFrame:Int = -1;
 	private var handledBy:Null<PlayerInput>;
+	private final focusStack:Array<InputFocus> = [];
+
+	/** Pushes a temporary input owner for this player only. **/
+	public function pushFocus(input:PlayerInput, clearHandlerOnRelease:Bool = false):InputFocus
+	{
+		var focus:InputFocus = null;
+		focus = new InputFocus(input, () -> {
+			focusStack.remove(focus);
+			if (clearHandlerOnRelease)
+				input.setHandler(null);
+		});
+		focusStack.push(focus);
+		return focus;
+	}
+
+	public function allowsInput(input:PlayerInput):Bool
+		return focusStack.length == 0 || focusStack[focusStack.length - 1].input == input;
+
+	/** Routes once per sampled frame, even when a handler changes focus. **/
+	public function routeInputs(fallback:PlayerInput, frame:Int):Bool
+	{
+		if (handledFrame == frame)
+			return false;
+		var input = focusStack.length == 0 ? fallback : focusStack[focusStack.length - 1].input;
+		return input.handleInputs();
+	}
+
+	public function clearFocus():Void
+	{
+		while (focusStack.length > 0)
+			focusStack[focusStack.length - 1].dispose();
+	}
 
 	public function new(id:Int, config:InputConfig, state:InputConnectionState = Empty)
 	{
@@ -452,6 +484,29 @@ class InputActionState
 		update(false, 0, 0);
 }
 
+/** Disposable focus ownership. Removing a buried entry does not disturb the current owner. **/
+class InputFocus
+{
+	public final input:PlayerInput;
+	private var release:Null<Void->Void>;
+
+	@:allow(plib.engine.input.PlayerInputState)
+	private function new(input:PlayerInput, release:Void->Void)
+	{
+		this.input = input;
+		this.release = release;
+	}
+
+	/** Restores the previous remaining owner. Safe to call more than once. **/
+	public function dispose():Void
+	{
+		if (release == null) return;
+		var callback = release;
+		release = null;
+		callback();
+	}
+}
+
 /** Public player facade and independently handled view over shared input state. **/
 class PlayerInput
 {
@@ -595,10 +650,28 @@ class PlayerInput
 		return [for (action in system.config.actionIterator()) if (pressed(action)) action];
 	}
 
-	/** Assigns the callback invoked by `handleInputs`; pass null to detach it. **/
+	/** Low-level handler replacement. Prefer pushHandler() for screen-owned input routing. **/
 	public inline function setHandler(handler:Null<PlayerInput->Void>)
 	{
 		this.handler = handler;
+	}
+
+	/**
+		Registers an input handler above this player's existing handlers.
+		Use the same API for gameplay, menus, and nested dialogs: the most recently
+		pushed remaining handler receives routed input. The fork is created internally.
+		Dispose the returned token when its owner leaves the tree; disposal also
+		detaches the callback. Removing a buried handler leaves the top owner active.
+		All handles for this player share the stack. Other players are unaffected.
+		Input is dispatched by InputSystem.handleInputs() or InputSession.handleInputs().
+	**/
+	public function pushHandler(handler:PlayerInput->Void):InputFocus
+	{
+		if (handler == null)
+			throw 'Input handler cannot be null.';
+		var input = fork();
+		input.setHandler(handler);
+		return shared.pushFocus(input, true);
 	}
 
 	/** Creates an unmanaged handle sharing this player's configuration and state. **/
@@ -607,10 +680,23 @@ class PlayerInput
 		return new PlayerInput(system, shared);
 	}
 
+	/**
+		Takes temporary focus for this handle. Normally called on a menu fork.
+		System/session routing invokes the top focused handle instead of gameplay.
+		Dispose the returned token when the menu leaves. Nested focus is supported.
+		Focus changes do not clear held inputs or prevent direct state queries.
+	**/
+	public function takeFocus():InputFocus
+		return shared.pushFocus(this);
+
+	/** Routes to this player's focused handle, or this handle when no focus exists. **/
+	public function routeInputs():Bool
+		return shared.routeInputs(this, system.frameId);
+
 	/** Invokes this handle once for the current sampled frame. **/
 	public function handleInputs():Bool
 	{
-		if (!connected || handler == null || !shared.claim(this, system.frameId))
+		if (!connected || handler == null || !shared.allowsInput(this) || !shared.claim(this, system.frameId))
 			return false;
 		handler(this);
 		return true;

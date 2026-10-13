@@ -315,7 +315,307 @@ typedef InputActivity =
 	var binding:InputBinding;
 }
 
-/** Application-owned hardware sampler, local session owner, and handler dispatcher. **/
+/** 
+	The input system converts physical controls into game actions, then caches their state each frame.
+
+	To make it work, you'll need this input system, a configuration and player bindings, and then
+	registering handlers to read the player inputs.
+
+	1. Define your actions via `InputKey`. These represent actions, not keyboard keys or gamepad buttons.
+
+	```
+	class Actions{
+		public static final JUMP = new plib.engine.input.InputKey("jump");
+		public static final ATTACK = new plib.engine.input.InputKey("attack");
+	}
+	```
+
+	2. Create your input config. This is where you define what button will trigger what action.
+	Do this in your application setup, such as `ready()`. An action can have multiple different
+	bindings. Bindings support mouse buttons, stick directions, and chords. Chords are combinations
+	of inputs held together.
+
+	```
+	import plib.engine.input.InputKey;
+	import plib.engine.input.InputConfig;
+	import plib.engine.input.InputConfig.InputBinding;
+	import plib.engine.input.InputConfig.PadButton;
+
+	var config = new InputConfig();
+	// register your actions
+	config.action(Actions.JUMP);
+	config.action(Actions.ATTACK);
+
+	// setup keyboard
+	var keyboard = config.keyboard("default");
+	keyboard.bind(Actions.JUMP, InputBinding.Key(hxd.Key.SPACE));
+	keyboard.bind(Actions.ATTACK, InputBinding.Key(hxd.Key.X));
+
+	// setup secondary keyboard bindings if needed
+	var keyboard2 = config.keyboard("player2");
+	keyboard2.bind(Actions.JUMP, InputBinding.Key(hxd.Key.UP));
+	keyboard2.bind(Actions.ATTACK, InputBinding.Key(hxd.Key.NUMPAD_1));
+
+	// setup controller bindings. These apply to all connected controllers.
+	config.controller.bind(Actions.JUMP, InputBinding.PadButton(PadButton.A));
+	config.controller.bind(Actions.ATTACK, InputBinding.PadButton(PadButton.X));
+
+	// when done, call this. `inputs` is app.inputs
+	inputs.configure(config);
+	```
+
+	3. For a single-player game, use inputs.main to read input states:
+
+	```
+	var input = Application.get().inputs.main; // or app.inputs.main in a screen node
+
+	var pressed = input.pressed(Actions.JUMP); // true if the action became down this frame
+	var down = input.down(Actions.ATTACK); // true if the action is down
+	var released = input.released(Actions.ATTACK); // true if the action is released this frame
+	var heldTime = input.heldTime(Actions.ATTACK); // seconds the action was held down.
+	var value = input.value(Actions.JUMP); // normalized input value for analog bindings.
+
+	if (input.down(Actions.ATTACK)){
+		attack();	
+	}
+	```
+
+	By default, inputs.main combines the default keyboard scheme and controllers.
+	The player can switch devices without gameplay code changing.
+
+	4. Use pushHandler() to register input handling for a screen or game character.
+	Gameplay, menus, and dialogs all use the same thing. Each player has their own
+	handler stack, and only the top handler receives routed input.
+
+	```
+	var gameplayFocus = input.pushHandler(function(input){
+		if (input.pressed(Actions.JUMP)){
+			// do something...
+		}
+	});
+	```
+
+	Keep the returned focus token. When its screen or character leaves, call
+	gameplayFocus.dispose() to remove that handler. If another handler was below it,
+	that one will resume on the next frame. Disposing a token more than once is fine.
+
+	The application samples input automatically, but you still need to dispatch handlers
+	from one update callback. Call inputs.handleInputs() after sampling, such as in a
+	node's update(). It routes to inputs.main or the active session's players.
+
+	```
+	inputs.handleInputs();
+	```
+
+	Direct checks from step 3 still work, but they bypass focus. Use handlers for things
+	that should stop responding when a menu takes control. Reading pressed() does not
+	consume the press.
+
+	5. Remapping changes a player profile. The defaults belong to InputConfig, but custom
+	controls belong to the player's InputProfile.
+
+	```
+	input.setKeyboardBinding(Actions.JUMP, 0, InputBinding.Key(hxd.Key.J));
+	```
+
+	the `0` means the first binding slot for the JUMP action. Other slots remain unchanged.
+
+	Profiles can be persisted through your settings system:
+
+	```
+	app.settings.set("inputProfile", input.saveProfile());
+	app.settings.save();
+	```
+
+	and can be loaded:
+
+	```
+	// after settings have loaded:
+	var json:String = app.settings.get('inputProfile', '');
+	if (json != ''){
+		input.loadProfile(json);	
+	}
+	```
+
+	Loading a profile can throw if its data is invalid, so handle that when
+	restoring saved preferences.
+
+	6. Local multiplayer uses an `InputSession`. It assigns separate devices or
+	keyboard schemes to players.
+
+	```
+	var session = inputs.createSession({
+		capacity: 4,
+		minimumPlayers: 1,
+		keyboardSchemes: ["default"]
+	});
+
+	session.listen();
+	```
+
+	While listening, button activity claims an available player slot.
+	Once enough players have joined:
+
+	```
+	if (session.canStart){
+		session.start();	
+	}
+	```
+
+	Then you use each player's input to push their gameplay handler:
+
+	```
+	var playerInput = session.getPlayer(0);
+	```
+
+	While a session is active, inputs are read through its players instead
+	of inputs.main. inputs.main will no longer update. Sessions also track
+	controller disconnections and support replacement controllers.
+
+	The standard way to handle multiple players is as such:
+
+	```
+	var session:InputSession;
+	var subscriptions:Array<SignalSubscription> = [];
+	var gameplayFocuses:Array<plib.engine.input.PlayerInput.InputFocus> = [];
+
+	function openLobby(){
+		session = app.inputs.createSession({
+			capacity: 4,
+			minimumPlayers: 2,
+			keyboardSchemes: ["default", "player2"],
+		});
+
+		subscriptions.push(session.onPlayerConnected.listen(player->{
+			trace('Player ${player.id + 1} joined.');
+		}));
+
+		subscriptions.push(session.onReady.listen(_->{
+			trace('Enough players have joined.');
+			// enable your lobby's Start button.
+		}));
+
+		subscriptions.push(session.onPlayerDisconnected.listen(player->{
+			trace('Player ${player.id + 1} disconnected.');
+			// Show your reconnect UI
+		}));
+
+		subscriptions.push(session.onPlayerReconnected.listen(player->{
+			trace('Player ${player.id + 1} reconnected.');
+		}));
+
+		session.listen();
+	}
+	```
+
+	A controller press will claim a free player slot.
+	A mapped key from registered keyboard schemes will claim a slot for
+	that scheme. Devices are assigned as activity is detected and not tied
+	to a fixed player number. The session doesnt start when the minimum player count
+	is matched. you need to start it manually via an explicit mean, like a start button.
+	You can start a lobby by calling something like this:
+
+	```
+	function startGame(){
+		if (!session.canStart){
+			return;	
+		}
+
+		session.start();
+
+		for (player in session.players){
+			// create or associate your game character here.
+			// Bind this player's input to that character.
+			var focus = player.pushHandler(input->{
+				if (input.down(Actions.ATTACK)){
+					trace('player id ${input.id} attacks!');
+					// do an attack	
+				}else if (input.pressed(Actions.JUMP)){
+					trace('player id ${input.id} jumps!');
+					// do a jump	
+				}
+			});
+			gameplayFocuses.push(focus);
+		}
+	}
+	```
+
+	You need to call the session's handlers from an update callback, after the application
+	has sampled input:
+
+	```haxe
+	function updateMatchInputs(){
+		if (session.state != Active && session.state != Disconnected){
+			return;
+		}
+		session.handleInputs();
+	}
+	```
+
+	This lets connected players keep playing while another controller is disconnected.
+	If you want to pause everyone instead, only handle inputs while the state is Active.
+	Call either session.handleInputs() or inputs.handleInputs(), not both in your update.
+
+	7. A player can open their own menu without stopping the others. The menu uses
+	pushHandler() on that same player. It creates a fork internally, sharing the player's
+	device, bindings, and input state, but using a separate handler.
+
+	```
+	var menuFocus = player.pushHandler(input->{
+		if (input.pressed(Actions.JUMP)){
+			// confirm the selected menu item...
+		}
+	});
+
+	// when closing the menu:
+	menuFocus.dispose();
+	```
+
+	Keep calling session.handleInputs() as before. It sends this player's input to their
+	menu and the other players' input to their own current handlers. You dont need to
+	change the gameplay handler or manually switch which handle gets called.
+
+	A dialog opened above the menu can push another handler. Closing it restores the
+	menu, and closing the menu restores gameplay. Removing a handler from below the
+	current one doesnt interrupt that current handler.
+
+	A menu node should keep its token and release it when leaving the tree:
+
+	```
+	var focus:plib.engine.input.PlayerInput.InputFocus;
+
+	override function onRemovedFromTree(){
+		super.onRemovedFromTree();
+		if (focus != null){
+			focus.dispose();
+		}
+	}
+	```
+
+	The token is not released automatically when a node leaves. Remember to dispose it.
+	Focus changes dont clear held inputs. A button still held when the menu closes can
+	be down for gameplay on the next frame, but handlers wont run twice in the same frame.
+
+	Finally, clean up when returning to the menu:
+
+	```
+	function closeGame(){
+		for (focus in gameplayFocuses){
+			focus.dispose();
+		}
+		gameplayFocuses.resize(0);
+
+		for (subscription in subscriptions){
+			subscription.dispose();
+		}
+		subscriptions.resize(0);
+		session.dispose();
+	}
+	```
+
+	Disposing the session clears its player handlers and focus stacks. Create a new session
+	for the next lobby.
+**/
 @:access(plib.engine.input.InputRebind)
 class InputSystem extends Node
 {
@@ -429,7 +729,7 @@ class InputSystem extends Node
 	/** Invokes cached handlers for main input or the active local session. **/
 	public function handleInputs():Int
 	{
-		return activeSession == null ? (main.handleInputs() ? 1 : 0) : activeSession.handleInputs();
+		return activeSession == null ? (main.routeInputs() ? 1 : 0) : activeSession.handleInputs();
 	}
 
 	private function dispatchGlobalMode()

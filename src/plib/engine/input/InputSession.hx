@@ -201,7 +201,7 @@ class InputSession
 			return 0;
 		var handled = 0;
 		for (player in activePlayers)
-			if (player.sessionEnabled && player.handleInputs())
+			if (player.sessionEnabled && player.routeInputs())
 				handled++;
 		return handled;
 	}
@@ -233,6 +233,7 @@ class InputSession
 		{
 			player.setHandler(null);
 			var shared = @:privateAccess player.getShared();
+			shared.clearFocus();
 			shared.connectionState = Empty;
 			shared.channel = null;
 			shared.releaseAll();
